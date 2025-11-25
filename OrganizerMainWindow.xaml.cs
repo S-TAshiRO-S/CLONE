@@ -42,9 +42,20 @@ namespace EAccess.Client
 
         private void BtnStartEvent_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Начать мероприятие", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var startWindow = new StartEventWindow
+            {
+                Owner = this
+            };
 
-            // В будущем: логика создания/старта события, подтверждение, создание бэкапа и т.д.
+            if (startWindow.ShowDialog() == true)
+            {
+                // Заглушка: дальнейшая логика запуска мероприятия будет добавлена позже
+                MessageBox.Show(
+                    $"Мероприятие \"{startWindow.EventName}\" сохранено",
+                    "Начать мероприятие",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
         }
     }
 }

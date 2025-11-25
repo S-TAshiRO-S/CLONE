@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Globalization;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -92,8 +92,21 @@ namespace EAccess.Client
                 if (passwordMatches && string.Equals(role, "Организатор", StringComparison.OrdinalIgnoreCase))
                 {
                     var fullName = string.Join(" ", new[] { lastName, firstName, middleName }.Where(x => !string.IsNullOrWhiteSpace(x)));
-                    var organizerWindow = new MainOrganizerWindow(fullName);
-                    organizerWindow.Show();
+                    reader.Close();
+
+                    var activeEvent = GetActiveEvent(connection);
+                    if (activeEvent.HasValue)
+                    {
+                        var evt = activeEvent.Value;
+                        var activeWindow = new OrganizerEventWindow(evt.EventId, evt.EventName, evt.StartDate, evt.EndDate, evt.Location, fullName);
+                        activeWindow.Show();
+                    }
+                    else
+                    {
+                        var organizerWindow = new MainOrganizerWindow(fullName);
+                        organizerWindow.Show();
+                    }
+
                     Close();
                 }
                 else
@@ -144,6 +157,35 @@ namespace EAccess.Client
             bool has = !string.IsNullOrEmpty(PasswordBox.Password);
             bool focused = PasswordBox.IsFocused;
             PasswordPlaceholder.Visibility = (!has && !focused) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private static ActiveEventInfo? GetActiveEvent(SqlConnection connection)
+        {
+            using var cmd = new SqlCommand("SELECT TOP 1 EventID, EventName, StartDate, EndDate, Location FROM Events WHERE IsActive = 1 ORDER BY EventID DESC", connection);
+            using var reader = cmd.ExecuteReader();
+
+            if (!reader.Read())
+            {
+                return null;
+            }
+
+            return new ActiveEventInfo
+            {
+                EventId = (reader["EventID"] as int?) ?? Convert.ToInt32(reader["EventID"]),
+                EventName = reader["EventName"] as string ?? string.Empty,
+                StartDate = reader["StartDate"] == DBNull.Value ? (DateTime?)null : (DateTime)reader["StartDate"],
+                EndDate = reader["EndDate"] == DBNull.Value ? (DateTime?)null : (DateTime)reader["EndDate"],
+                Location = reader["Location"] as string
+            };
+        }
+
+        private struct ActiveEventInfo
+        {
+            public int EventId { get; init; }
+            public string EventName { get; init; }
+            public DateTime? StartDate { get; init; }
+            public DateTime? EndDate { get; init; }
+            public string? Location { get; init; }
         }
     }
 

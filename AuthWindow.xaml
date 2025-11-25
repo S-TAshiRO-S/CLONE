@@ -78,7 +78,7 @@
                                      Foreground="{StaticResource WhiteBrush}" FontSize="20"/>
                             <!-- Серый текст про логин -->
                             <TextBlock Text="Введите логин" IsHitTestVisible="False" VerticalAlignment="Center" Margin="6,0,0,0"
-                                       FontFamily="{StaticResource AppFont}" FontSize="20" Foreground="#9BA3B3">
+                                       FontFamily="{StaticResource AppFont}" FontSize="20" Foreground="#9BA3B3" Height="20">
                                 <TextBlock.Visibility>
                                     <MultiBinding Converter="{StaticResource PlaceholderConverter}">
                                         <Binding ElementName="LoginTextBox" Path="Text"/>
@@ -112,10 +112,10 @@
 
             <!-- Большая кнопка -->
             <Border HorizontalAlignment="Center" CornerRadius="25" Margin="0,56,0,50"
-                    Width="560" Height="110" Background="{StaticResource PrimaryGradient}">
+                    Width="450" Height="90" Background="{StaticResource PrimaryGradient}">
                 <Button x:Name="LoginButton" Click="Login_Click" Background="Transparent" BorderThickness="0"
                         FontFamily="{StaticResource AppFont}" FontSize="72" Foreground="{StaticResource WhiteBrush}"
-                        Cursor="Hand" Content="Вход" FontWeight="Bold"/>
+                        Cursor="Hand" Content="Вход" FontWeight="Bold" Width="300"/>
             </Border>
 
         </StackPanel>

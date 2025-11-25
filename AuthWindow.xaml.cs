@@ -53,7 +53,7 @@ namespace EAccess.Client
                 return;
             }
 
-            var connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString;
+            string? connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString;
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -63,7 +63,7 @@ namespace EAccess.Client
 
             try
             {
-                using var connection = new SqlConnection(connectionString);
+                using var connection = new SqlConnection(connectionString!);
                 connection.Open();
 
                 using var command = new SqlCommand(
@@ -79,11 +79,11 @@ namespace EAccess.Client
                     return;
                 }
 
-                var storedHash = reader["PasswordHash"] as byte[];
-                var role = reader["Role"] as string ?? string.Empty;
-                var lastName = reader["LastName"] as string ?? string.Empty;
-                var firstName = reader["FirstName"] as string ?? string.Empty;
-                var middleName = reader["MiddleName"] as string ?? string.Empty;
+                var storedHash = reader["PasswordHash"] as byte[] ?? Array.Empty<byte>();
+                string role = reader["Role"] as string ?? string.Empty;
+                string lastName = reader["LastName"] as string ?? string.Empty;
+                string firstName = reader["FirstName"] as string ?? string.Empty;
+                string middleName = reader["MiddleName"] as string ?? string.Empty;
 
                 var passwordHash = ComputeSha256(PasswordBox.Password);
 

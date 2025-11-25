@@ -1,6 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -49,8 +53,69 @@ namespace EAccess.Client
                 return;
             }
 
-            MessageBox.Show($"Логин: {LoginTextBox.Text}\nПароль: {(PasswordBox.Password.Length > 0 ? "●●●●" : "(пусто)")}");
+            var connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString;
 
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+
+                using var command = new SqlCommand(
+                    "SELECT UserID, PasswordHash, Role, LastName, FirstName, MiddleName FROM Users WHERE Login = @login",
+                    connection);
+                command.Parameters.AddWithValue("@login", LoginTextBox.Text);
+
+                using var reader = command.ExecuteReader();
+
+                if (!reader.Read())
+                {
+                    ShowUserNotFoundMessage();
+                    return;
+                }
+
+                var storedHash = reader["PasswordHash"] as byte[];
+                var role = reader["Role"] as string ?? string.Empty;
+                var lastName = reader["LastName"] as string ?? string.Empty;
+                var firstName = reader["FirstName"] as string ?? string.Empty;
+                var middleName = reader["MiddleName"] as string ?? string.Empty;
+
+                var passwordHash = ComputeSha256(PasswordBox.Password);
+
+                bool passwordMatches = storedHash != null && storedHash.SequenceEqual(passwordHash);
+
+                if (passwordMatches && string.Equals(role, "Организатор", StringComparison.OrdinalIgnoreCase))
+                {
+                    var fullName = string.Join(" ", new[] { lastName, firstName, middleName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                    var organizerWindow = new MainOrganizerWindow(fullName);
+                    organizerWindow.Show();
+                    Close();
+                }
+                else
+                {
+                    ShowUserNotFoundMessage();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при подключении к базе данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private static byte[] ComputeSha256(string text)
+        {
+            using var sha = SHA256.Create();
+            return sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(text));
+        }
+
+        private static void ShowUserNotFoundMessage()
+        {
+            MessageBox.Show("Такого пользователя не существует", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)

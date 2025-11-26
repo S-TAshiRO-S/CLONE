@@ -2,7 +2,11 @@
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace EAccess.Client
 {
@@ -61,6 +65,55 @@ namespace EAccess.Client
             SaveDateValue(EndDateTextBox.Text, "EndDate", ref _endDate, EndDateTextBox);
         }
 
+        private void DateTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+
+        private void DateTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(DataFormats.Text))
+            {
+                var text = (string)e.DataObject.GetData(DataFormats.Text);
+                var digits = Regex.Replace(text ?? string.Empty, "[^0-9]", string.Empty);
+                e.DataObject = new DataObject(DataFormats.Text, digits);
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
+        private void DateTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not TextBox textBox)
+            {
+                return;
+            }
+
+            var caretDigits = CountDigitsBeforeCaret(textBox.Text, textBox.CaretIndex);
+
+            var digitsOnly = Regex.Replace(textBox.Text, "[^0-9]", string.Empty);
+            if (digitsOnly.Length > 8)
+            {
+                digitsOnly = digitsOnly[..8];
+            }
+
+            var formatted = InsertDateSeparators(digitsOnly);
+
+            if (textBox.Text == formatted)
+            {
+                return;
+            }
+
+            var newCaretIndex = CalculateCaretIndex(formatted, caretDigits);
+
+            textBox.TextChanged -= DateTextBox_TextChanged;
+            textBox.Text = formatted;
+            textBox.CaretIndex = newCaretIndex;
+            textBox.TextChanged += DateTextBox_TextChanged;
+        }
+
         private void LocationTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             SaveLocation(LocationTextBox.Text);
@@ -78,11 +131,39 @@ namespace EAccess.Client
                 using var connection = new SqlConnection(_connectionString);
                 connection.Open();
 
-                using var cmd = new SqlCommand("UPDATE Events SET IsActive = 0 WHERE EventID = @id", connection);
-                cmd.Parameters.AddWithValue("@id", _eventId);
-                cmd.ExecuteNonQuery();
+                using var transaction = connection.BeginTransaction();
 
-                MessageBox.Show("Мероприятие завершено", "Сохранение", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    using (var deactivate = new SqlCommand("UPDATE Events SET IsActive = 0 WHERE EventID = @id", connection, transaction))
+                    {
+                        deactivate.Parameters.AddWithValue("@id", _eventId);
+                        deactivate.ExecuteNonQuery();
+                    }
+
+                    var cleanupCommands = new[]
+                    {
+                        "DELETE FROM AccessAudit",
+                        "DELETE FROM SecurityAudit",
+                        "DELETE FROM AccessList",
+                        "DELETE FROM Events"
+                    };
+
+                    foreach (var commandText in cleanupCommands)
+                    {
+                        using var cmd = new SqlCommand(commandText, connection, transaction);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+
+                MessageBox.Show("Мероприятие завершено. Данные очищены", "Сохранение", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 var main = new MainOrganizerWindow(UserFullNameTextBlock.Text);
                 main.Show();
@@ -181,6 +262,47 @@ namespace EAccess.Client
         private static string FormatDate(DateTime? date)
         {
             return date.HasValue ? date.Value.ToString("dd.MM.yyyy") : string.Empty;
+        }
+
+        private static string InsertDateSeparators(string digits)
+        {
+            return digits.Length switch
+            {
+                <= 2 => digits,
+                <= 4 => $"{digits[..2]}.{digits[2..]}",
+                _ => $"{digits[..2]}.{digits[2..4]}.{digits[4..]}"
+            };
+        }
+
+        private static int CountDigitsBeforeCaret(string text, int caretIndex)
+        {
+            caretIndex = Math.Min(caretIndex, text.Length);
+            var leftPart = caretIndex > 0 ? text[..caretIndex] : string.Empty;
+            return leftPart.Count(char.IsDigit);
+        }
+
+        private static int CalculateCaretIndex(string formatted, int digitsBeforeCaret)
+        {
+            if (digitsBeforeCaret <= 0)
+            {
+                return 0;
+            }
+
+            var digitsSeen = 0;
+            for (var i = 0; i < formatted.Length; i++)
+            {
+                if (char.IsDigit(formatted[i]))
+                {
+                    digitsSeen++;
+                }
+
+                if (digitsSeen >= digitsBeforeCaret)
+                {
+                    return i + 1;
+                }
+            }
+
+            return formatted.Length;
         }
     }
 }

@@ -171,11 +171,19 @@
                             <ColumnDefinition Width="170"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Даты проведения: с" Style="{StaticResource SmallLabel}" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="2" x:Name="StartDateTextBox" Height="52" Style="{StaticResource InputBox}" 
-                                 LostFocus="StartDateTextBox_LostFocus"/>
+                        <TextBox Grid.Column="2" x:Name="StartDateTextBox" Height="52" Style="{StaticResource InputBox}"
+                                 LostFocus="StartDateTextBox_LostFocus"
+                                 PreviewTextInput="DateTextBox_PreviewTextInput"
+                                 TextChanged="DateTextBox_TextChanged"
+                                 DataObject.Pasting="DateTextBox_Pasting"
+                                 MaxLength="10"/>
                         <TextBlock Grid.Column="4" Text="по" Style="{StaticResource SmallLabel}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        <TextBox Grid.Column="6" x:Name="EndDateTextBox" Height="52" Style="{StaticResource InputBox}" 
-                                 LostFocus="EndDateTextBox_LostFocus"/>
+                        <TextBox Grid.Column="6" x:Name="EndDateTextBox" Height="52" Style="{StaticResource InputBox}"
+                                 LostFocus="EndDateTextBox_LostFocus"
+                                 PreviewTextInput="DateTextBox_PreviewTextInput"
+                                 TextChanged="DateTextBox_TextChanged"
+                                 DataObject.Pasting="DateTextBox_Pasting"
+                                 MaxLength="10"/>
                     </Grid>
 
                     <Grid Grid.Row="4" Width="760" HorizontalAlignment="Center">

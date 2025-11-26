@@ -49,12 +49,16 @@ namespace EAccess.Client
 
             if (startWindow.ShowDialog() == true)
             {
-                // Заглушка: дальнейшая логика запуска мероприятия будет добавлена позже
-                MessageBox.Show(
-                    $"Мероприятие \"{startWindow.EventName}\" сохранено",
-                    "Начать мероприятие",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                var eventWindow = new OrganizerEventWindow(
+                    startWindow.EventId,
+                    startWindow.EventName,
+                    null,
+                    null,
+                    null,
+                    UserFullName);
+
+                eventWindow.Show();
+                Close();
             }
         }
     }

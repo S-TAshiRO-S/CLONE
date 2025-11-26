@@ -27,17 +27,32 @@ namespace EAccess.Client
 
         private void BtnBudget_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Смета", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var popup = new NoEventPopup
+            {
+                Owner = this
+            };
+
+            popup.ShowDialog();
         }
 
         private void BtnReports_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Отчёты", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var popup = new NoEventPopup
+            {
+                Owner = this
+            };
+
+            popup.ShowDialog();
         }
 
         private void BtnAudit_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Аудит", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var popup = new NoEventPopup
+            {
+                Owner = this
+            };
+
+            popup.ShowDialog();
         }
 
         private void BtnStartEvent_Click(object sender, RoutedEventArgs e)

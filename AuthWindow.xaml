@@ -41,6 +41,25 @@
             <Setter Property="FontSize" Value="20"/>
         </Style>
 
+        <!-- Кнопка входа без стандартной подсветки при наведении -->
+        <Style x:Key="LoginButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{StaticResource WhiteBrush}"/>
+            <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
+            <Setter Property="FontSize" Value="72"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
         <!-- Серый текст -->
         <local:TextEmptyAndNotFocusedToVisibilityConverter x:Key="PlaceholderConverter"/>
     </Window.Resources>
@@ -113,9 +132,8 @@
             <!-- Большая кнопка -->
             <Border HorizontalAlignment="Center" CornerRadius="25" Margin="0,56,0,50"
                     Width="450" Height="90" Background="{StaticResource PrimaryGradient}">
-                <Button x:Name="LoginButton" Click="Login_Click" Background="Transparent" BorderThickness="0"
-                        FontFamily="{StaticResource AppFont}" FontSize="72" Foreground="{StaticResource WhiteBrush}"
-                        Cursor="Hand" Content="Вход" FontWeight="Bold" Width="300"/>
+                <Button x:Name="LoginButton" Click="Login_Click" Style="{StaticResource LoginButtonStyle}" Content="Вход"
+                        Width="300"/>
             </Border>
 
         </StackPanel>

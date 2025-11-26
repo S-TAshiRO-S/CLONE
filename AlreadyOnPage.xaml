@@ -3,9 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:EAccess.Client"
         Title="Уведомление"
-        Width="777" Height="494"
-        MinWidth="777" MinHeight="494"
-        MaxWidth="777" MaxHeight="494"
+        WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -16,6 +14,7 @@
         <Color x:Key="PrimaryColor2">#F78361</Color>
         <SolidColorBrush x:Key="PrimaryBrush" Color="#2A2E3A"/>
         <SolidColorBrush x:Key="WhiteBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="OverlayBrush" Color="#B3000000"/>
         <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="{StaticResource PrimaryColor1}" Offset="0"/>
             <GradientStop Color="{StaticResource PrimaryColor2}" Offset="1"/>
@@ -50,37 +49,39 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource PrimaryBrush}" CornerRadius="24" Padding="32" SnapsToDevicePixels="True">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+    <Grid Background="{StaticResource OverlayBrush}">
+        <Border Background="{StaticResource PrimaryBrush}" CornerRadius="24" Padding="32" SnapsToDevicePixels="True" Width="777" Height="494" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Margin="0,10,0,30" HorizontalAlignment="Center">
-                <Image Source="pack://application:,,,/EAccess.Client;component/pictures/logo.png"
-                   Width="175" Height="153" Margin="0,0,0,12"/>
-                <TextBlock Text="Страж" FontFamily="{StaticResource AppFont}" FontSize="48" FontWeight="Bold" Foreground="{StaticResource WhiteBrush}" HorizontalAlignment="Center"/>
-            </StackPanel>
+                <StackPanel Grid.Row="0" Margin="0,10,0,30" HorizontalAlignment="Center">
+                    <Image Source="pack://application:,,,/EAccess.Client;component/pictures/logo.png"
+                       Width="175" Height="153" Margin="0,0,0,12"/>
+                    <TextBlock Text="Страж" FontFamily="{StaticResource AppFont}" FontSize="48" FontWeight="Bold" Foreground="{StaticResource WhiteBrush}" HorizontalAlignment="Center"/>
+                </StackPanel>
 
-            <TextBlock Grid.Row="1"
-                   Text="Вы уже на данной страннице!"
-                       FontFamily="{StaticResource AppFont}"
-                       FontSize="36"
-                       FontWeight="Bold"
-                       Foreground="{StaticResource WhiteBrush}"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       TextWrapping="Wrap"
-                       TextAlignment="Center"/>
+                <TextBlock Grid.Row="1"
+                       Text="Вы уже на данной страннице!"
+                           FontFamily="{StaticResource AppFont}"
+                           FontSize="36"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource WhiteBrush}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"/>
 
-            <Border Grid.Row="2" HorizontalAlignment="Right" Margin="0,30,8,0" CornerRadius="18" Background="{StaticResource PrimaryGradient}" Width="250" Height="70" VerticalAlignment="Bottom">
-                <Button x:Name="OkButton"
-                        Click="OkButton_Click"
-                        Style="{StaticResource OkButtonStyle}"
-                        Content="Хорошо"/>
-            </Border>
-        </Grid>
-    </Border>
+                <Border Grid.Row="2" HorizontalAlignment="Right" Margin="0,30,8,0" CornerRadius="18" Background="{StaticResource PrimaryGradient}" Width="250" Height="70" VerticalAlignment="Bottom">
+                    <Button x:Name="OkButton"
+                            Click="OkButton_Click"
+                            Style="{StaticResource OkButtonStyle}"
+                            Content="Хорошо"/>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

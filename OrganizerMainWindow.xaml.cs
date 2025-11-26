@@ -22,7 +22,12 @@ namespace EAccess.Client
 
         private void BtnMain_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Главная", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var popup = new AlreadyOnPage
+            {
+                Owner = this
+            };
+
+            popup.ShowDialog();
         }
 
         private void BtnBudget_Click(object sender, RoutedEventArgs e)

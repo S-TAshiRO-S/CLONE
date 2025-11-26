@@ -1,4 +1,4 @@
-﻿<Window x:Class="EAccess.Client.NoEventPopup"
+﻿<Window x:Class="EAccess.Client.AlreadyOnPage"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:EAccess.Client"
@@ -65,7 +65,7 @@
             </StackPanel>
 
             <TextBlock Grid.Row="1"
-                   Text="Вы еще не создали мероприятие!"
+                   Text="Вы уже на данной страннице!"
                        FontFamily="{StaticResource AppFont}"
                        FontSize="36"
                        FontWeight="Bold"

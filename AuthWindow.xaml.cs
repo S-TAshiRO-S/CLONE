@@ -89,9 +89,16 @@ namespace EAccess.Client
 
                 bool passwordMatches = storedHash != null && storedHash.SequenceEqual(passwordHash);
 
-                if (passwordMatches && string.Equals(role, "Организатор", StringComparison.OrdinalIgnoreCase))
+                if (!passwordMatches)
                 {
-                    var fullName = string.Join(" ", new[] { lastName, firstName, middleName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                    ShowUserNotFoundMessage();
+                    return;
+                }
+
+                var fullName = string.Join(" ", new[] { lastName, firstName, middleName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+                if (string.Equals(role, "Организатор", StringComparison.OrdinalIgnoreCase))
+                {
                     reader.Close();
 
                     var activeEvent = GetActiveEvent(connection);
@@ -108,6 +115,28 @@ namespace EAccess.Client
                     }
 
                     Close();
+                }
+                else if (string.Equals(role, "Служба безопасности", StringComparison.OrdinalIgnoreCase))
+                {
+                    reader.Close();
+                    var activeEvent = GetActiveEvent(connection);
+
+                    if (activeEvent.HasValue)
+                    {
+                        var evt = activeEvent.Value;
+                        var securityWindow = new SecurityMainWindow(evt.EventName, evt.StartDate, evt.EndDate, evt.Location, fullName);
+                        securityWindow.Show();
+                        Close();
+                    }
+                    else
+                    {
+                        var popup = new NoEventPopup
+                        {
+                            Owner = this
+                        };
+
+                        popup.ShowDialog();
+                    }
                 }
                 else
                 {

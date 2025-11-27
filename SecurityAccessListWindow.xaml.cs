@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Configuration;
+using System.Data.SqlClient;
 using System.Windows;
 
 namespace EAccess.Client
@@ -27,29 +29,7 @@ namespace EAccess.Client
 
             UserFullNameTextBlock.Text = userFullName;
 
-            // Заглушечные данные для визуализации таблицы; будут заменены загрузкой из БД позже
-            AccessEntries.Add(new AccessEntry
-            {
-                LastName = "Карпов",
-                FirstName = "Глеб",
-                MiddleName = "Андреевич",
-                Phone = "89990155772",
-                Passport = "4090123456",
-                Position = "Безопасность",
-                AccredStart = new DateTime(2025, 10, 10),
-                AccredEnd = new DateTime(2025, 10, 20)
-            });
-            AccessEntries.Add(new AccessEntry
-            {
-                LastName = "Иванова",
-                FirstName = "Мария",
-                MiddleName = "Петровна",
-                Phone = "87774441100",
-                Passport = "5011223344",
-                Position = "Волонтер",
-                AccredStart = new DateTime(2025, 10, 12),
-                AccredEnd = new DateTime(2025, 10, 21)
-            });
+            LoadAccessEntries();
         }
 
         private void BtnMain_Click(object sender, RoutedEventArgs e)
@@ -88,6 +68,51 @@ namespace EAccess.Client
         {
             MessageBox.Show("Заглушка: удалить запись", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
+        private void LoadAccessEntries()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString;
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+
+                const string query = @"SELECT a.LastName, a.FirstName, a.MiddleName, a.Phone, a.Passport, p.PositionName, a.AccredStart, a.AccredEnd
+                                        FROM AccessList a
+                                        INNER JOIN Positions p ON a.PositionID = p.PositionID";
+
+                using var command = new SqlCommand(query, connection);
+                using var reader = command.ExecuteReader();
+
+                AccessEntries.Clear();
+                while (reader.Read())
+                {
+                    var entry = new AccessEntry
+                    {
+                        LastName = reader["LastName"] as string ?? string.Empty,
+                        FirstName = reader["FirstName"] as string ?? string.Empty,
+                        MiddleName = reader["MiddleName"] as string,
+                        Phone = reader["Phone"] as string ?? string.Empty,
+                        Passport = reader["Passport"] as string ?? string.Empty,
+                        Position = reader["PositionName"] as string ?? string.Empty,
+                        AccredStart = reader.GetDateTime(reader.GetOrdinal("AccredStart")),
+                        AccredEnd = reader.GetDateTime(reader.GetOrdinal("AccredEnd"))
+                    };
+
+                    AccessEntries.Add(entry);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке списка допусков: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 
     public class AccessEntry
@@ -100,5 +125,7 @@ namespace EAccess.Client
         public string Position { get; set; } = string.Empty;
         public DateTime AccredStart { get; set; }
         public DateTime AccredEnd { get; set; }
+
+        public string AccreditationRange => $"с {AccredStart:dd.MM.yyyy} по {AccredEnd:dd.MM.yyyy}";
     }
 }

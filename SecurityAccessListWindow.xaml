@@ -86,8 +86,11 @@
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="RowHeight" Value="48"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
-            <Setter Property="GridLinesVisibility" Value="None"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="GridLinesVisibility" Value="All"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#555C6D"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#555C6D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#555C6D"/>
             <Setter Property="SelectionMode" Value="Extended"/>
             <Setter Property="SelectionUnit" Value="FullRow"/>
             <Setter Property="IsReadOnly" Value="True"/>
@@ -134,7 +137,14 @@
                     <Button x:Name="BtnReports" Content="Отчёты" Style="{StaticResource SidebarMenuButton}"
                             Click="BtnReports_Click" Width="300" Height="64" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,25"/>
                     <Button x:Name="BtnControlAudit" Content="Контроль / Аудит" Style="{StaticResource SidebarMenuButton}"
-                            Click="BtnControlAudit_Click" Height="64" Width="300" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,0"/>
+                            Click="BtnControlAudit_Click" Height="64" Width="300" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,25"/>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="30.5,0,0,0">
+                        
+                        <Button x:Name="BtnAdd" Content="+" Width="110" Height="60" FontSize="32" FontWeight="Bold"
+                            Style="{StaticResource PrimaryRoundedButton}" Click="BtnAdd_Click" Margin="0,0,12,0"/>
+                        <Button x:Name="BtnDelete" Content="-" Width="110" Height="60" FontSize="32" FontWeight="Bold"
+                            Style="{StaticResource PrimaryRoundedButton}" Click="BtnDelete_Click" Margin="67,0,0,0" />
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>
@@ -251,23 +261,7 @@
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource TableCell}"/>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Аккредитация с" Binding="{Binding AccredStart, StringFormat=dd.MM.yyyy}" Width="160">
-                                <DataGridTextColumn.HeaderStyle>
-                                    <Style TargetType="DataGridColumnHeader">
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                        <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="Foreground" Value="{StaticResource WhiteBrush}"/>
-                                        <Setter Property="FontSize" Value="20"/>
-                                        <Setter Property="Background" Value="#2A2E3A"/>
-                                    </Style>
-                                </DataGridTextColumn.HeaderStyle>
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource TableCell}"/>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Аккредитация по" Binding="{Binding AccredEnd, StringFormat=dd.MM.yyyy}" Width="160">
+                            <DataGridTextColumn Header="Аккредитация" Binding="{Binding AccreditationRange}" Width="240">
                                 <DataGridTextColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -286,13 +280,6 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
-
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                    <Button x:Name="BtnAdd" Content="+" Width="120" Height="54" FontSize="32" FontWeight="Bold"
-                            Style="{StaticResource PrimaryRoundedButton}" Click="BtnAdd_Click" Margin="0,0,20,0"/>
-                    <Button x:Name="BtnDelete" Content="-" Width="120" Height="54" FontSize="32" FontWeight="Bold"
-                            Style="{StaticResource PrimaryRoundedButton}" Click="BtnDelete_Click"/>
-                </StackPanel>
             </Grid>
         </Grid>
     </Grid>

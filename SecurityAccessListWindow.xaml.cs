@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Windows;
+using System.Windows.Input;
 
 namespace EAccess.Client
 {
@@ -15,6 +16,7 @@ namespace EAccess.Client
         private readonly DateTime? _endDate;
         private readonly string? _location;
         private readonly string _userFullName;
+        private readonly string? _connectionString;
 
         public SecurityAccessListWindow(string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName)
         {
@@ -26,6 +28,7 @@ namespace EAccess.Client
             _endDate = endDate;
             _location = location;
             _userFullName = userFullName;
+            _connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString;
 
             UserFullNameTextBlock.Text = userFullName;
 
@@ -61,7 +64,21 @@ namespace EAccess.Client
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Заглушка: добавить запись", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (string.IsNullOrWhiteSpace(_connectionString))
+            {
+                MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var popup = new AddEditAccessWindow(_connectionString)
+            {
+                Owner = this
+            };
+
+            if (popup.ShowDialog() == true)
+            {
+                LoadAccessEntries();
+            }
         }
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
@@ -69,10 +86,33 @@ namespace EAccess.Client
             MessageBox.Show("Заглушка: удалить запись", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        private void AccessDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (AccessDataGrid.SelectedItem is not AccessEntry entry)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_connectionString))
+            {
+                MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var popup = new AddEditAccessWindow(_connectionString, entry)
+            {
+                Owner = this
+            };
+
+            if (popup.ShowDialog() == true)
+            {
+                LoadAccessEntries();
+            }
+        }
+
         private void LoadAccessEntries()
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString;
-            if (string.IsNullOrWhiteSpace(connectionString))
+            if (string.IsNullOrWhiteSpace(_connectionString))
             {
                 MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -80,10 +120,10 @@ namespace EAccess.Client
 
             try
             {
-                using var connection = new SqlConnection(connectionString);
+                using var connection = new SqlConnection(_connectionString);
                 connection.Open();
 
-                const string query = @"SELECT a.LastName, a.FirstName, a.MiddleName, a.Phone, a.Passport, p.PositionName, a.AccredStart, a.AccredEnd
+                const string query = @"SELECT a.AccessID, a.LastName, a.FirstName, a.MiddleName, a.Phone, a.Passport, p.PositionName, a.AccredStart, a.AccredEnd
                                         FROM AccessList a
                                         INNER JOIN Positions p ON a.PositionID = p.PositionID";
 
@@ -95,6 +135,7 @@ namespace EAccess.Client
                 {
                     var entry = new AccessEntry
                     {
+                        AccessId = reader.GetInt32(reader.GetOrdinal("AccessID")),
                         LastName = reader["LastName"] as string ?? string.Empty,
                         FirstName = reader["FirstName"] as string ?? string.Empty,
                         MiddleName = reader["MiddleName"] as string,
@@ -117,6 +158,7 @@ namespace EAccess.Client
 
     public class AccessEntry
     {
+        public int AccessId { get; set; }
         public string LastName { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string? MiddleName { get; set; }

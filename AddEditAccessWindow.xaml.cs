@@ -1,0 +1,274 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+
+namespace EAccess.Client
+{
+    public partial class AddEditAccessWindow : Window
+    {
+        private readonly string _connectionString;
+        private readonly AccessEntry? _existingEntry;
+        private bool _isDateFormatting;
+
+        public AddEditAccessWindow(string connectionString, AccessEntry? entry = null)
+        {
+            InitializeComponent();
+
+            _connectionString = connectionString;
+            _existingEntry = entry;
+
+            LoadPositions();
+            PopulateFieldsIfEdit();
+        }
+
+        private void LoadPositions()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                connection.Open();
+
+                const string query = "SELECT PositionID, PositionName FROM Positions ORDER BY PositionName";
+                using var adapter = new SqlDataAdapter(query, connection);
+
+                var table = new DataTable();
+                adapter.Fill(table);
+
+                var positions = table.Rows
+                    .Cast<DataRow>()
+                    .Select(r => new PositionOption((int)r["PositionID"], r["PositionName"] as string ?? string.Empty))
+                    .ToList();
+
+                PositionComboBox.ItemsSource = positions;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось загрузить список должностей: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void PopulateFieldsIfEdit()
+        {
+            if (_existingEntry is null)
+            {
+                return;
+            }
+
+            PassportTextBox.Text = _existingEntry.Passport;
+            AccredStartTextBox.Text = _existingEntry.AccredStart.ToString("dd.MM.yyyy");
+            AccredEndTextBox.Text = _existingEntry.AccredEnd.ToString("dd.MM.yyyy");
+            LastNameTextBox.Text = _existingEntry.LastName;
+            FirstNameTextBox.Text = _existingEntry.FirstName;
+            MiddleNameTextBox.Text = _existingEntry.MiddleName;
+
+            var trimmedPhone = _existingEntry.Phone.StartsWith("8") && _existingEntry.Phone.Length == 11
+                ? _existingEntry.Phone.Substring(1)
+                : _existingEntry.Phone;
+
+            PhoneTextBox.Text = trimmedPhone;
+
+            if (PositionComboBox.ItemsSource is IEnumerable<PositionOption> options)
+            {
+                var selected = options.FirstOrDefault(o => o.Name.Equals(_existingEntry.Position, StringComparison.OrdinalIgnoreCase));
+                if (selected is not null)
+                {
+                    PositionComboBox.SelectedValue = selected.Id;
+                }
+            }
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!TryValidate(out var startDate, out var endDate, out var positionId))
+            {
+                return;
+            }
+
+            var phoneWithoutCode = PhoneTextBox.Text.Trim();
+            var phoneWithCountryCode = $"8{phoneWithoutCode}";
+
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                connection.Open();
+
+                if (_existingEntry is null)
+                {
+                    const string insertQuery = @"INSERT INTO AccessList (LastName, FirstName, MiddleName, Phone, Passport, PositionID, AccredStart, AccredEnd)
+                                                 VALUES (@LastName, @FirstName, @MiddleName, @Phone, @Passport, @PositionId, @AccredStart, @AccredEnd)";
+
+                    using var command = new SqlCommand(insertQuery, connection);
+                    command.Parameters.AddWithValue("@LastName", LastNameTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@FirstName", FirstNameTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@MiddleName", string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) ? DBNull.Value : MiddleNameTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@Phone", phoneWithCountryCode);
+                    command.Parameters.AddWithValue("@Passport", PassportTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@PositionId", positionId);
+                    command.Parameters.AddWithValue("@AccredStart", startDate);
+                    command.Parameters.AddWithValue("@AccredEnd", endDate);
+
+                    command.ExecuteNonQuery();
+                }
+                else
+                {
+                    const string updateQuery = @"UPDATE AccessList
+                                                 SET LastName = @LastName, FirstName = @FirstName, MiddleName = @MiddleName, Phone = @Phone, Passport = @Passport, PositionID = @PositionId, AccredStart = @AccredStart, AccredEnd = @AccredEnd
+                                                 WHERE AccessID = @AccessId";
+
+                    using var command = new SqlCommand(updateQuery, connection);
+                    command.Parameters.AddWithValue("@LastName", LastNameTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@FirstName", FirstNameTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@MiddleName", string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) ? DBNull.Value : MiddleNameTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@Phone", phoneWithCountryCode);
+                    command.Parameters.AddWithValue("@Passport", PassportTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@PositionId", positionId);
+                    command.Parameters.AddWithValue("@AccredStart", startDate);
+                    command.Parameters.AddWithValue("@AccredEnd", endDate);
+                    command.Parameters.AddWithValue("@AccessId", _existingEntry.AccessId);
+
+                    command.ExecuteNonQuery();
+                }
+
+                DialogResult = true;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось сохранить запись: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private bool TryValidate(out DateTime accredStart, out DateTime accredEnd, out int positionId)
+        {
+            accredStart = default;
+            accredEnd = default;
+            positionId = 0;
+
+            if (string.IsNullOrWhiteSpace(LastNameTextBox.Text))
+            {
+                MessageBox.Show("Поле 'Фамилия' обязательно для заполнения.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(FirstNameTextBox.Text))
+            {
+                MessageBox.Show("Поле 'Имя' обязательно для заполнения.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (!IsDigitsExactLength(PassportTextBox.Text, 10))
+            {
+                MessageBox.Show("Паспорт должен содержать ровно 10 цифр без пробелов и символов.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (!IsDigitsExactLength(PhoneTextBox.Text, 10))
+            {
+                MessageBox.Show("Телефон должен содержать ровно 10 цифр после кода страны 8.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (!DateTime.TryParseExact(AccredStartTextBox.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out accredStart))
+            {
+                MessageBox.Show("Дата 'Аккредитация с' указана неверно. Используйте формат дд.мм.гггг.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (!DateTime.TryParseExact(AccredEndTextBox.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out accredEnd))
+            {
+                MessageBox.Show("Дата 'Аккредитация по' указана неверно. Используйте формат дд.мм.гггг.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (accredEnd < accredStart)
+            {
+                MessageBox.Show("Дата окончания аккредитации не может быть раньше даты начала.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (PositionComboBox.SelectedValue is not int selectedPosition)
+            {
+                MessageBox.Show("Выберите должность из списка.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            positionId = selectedPosition;
+            return true;
+        }
+
+        private void DigitsOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+
+        private void DateTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isDateFormatting)
+            {
+                return;
+            }
+
+            if (sender is not TextBox textBox)
+            {
+                return;
+            }
+
+            var digits = new string(textBox.Text.Where(char.IsDigit).ToArray());
+            if (digits.Length > 8)
+            {
+                digits = digits[..8];
+            }
+
+            var formatted = digits;
+            if (digits.Length > 4)
+            {
+                formatted = $"{digits[..2]}.{digits.Substring(2, 2)}.{digits[4..]}";
+            }
+            else if (digits.Length > 2)
+            {
+                formatted = $"{digits[..2]}.{digits[2..]}";
+            }
+
+            _isDateFormatting = true;
+            textBox.Text = formatted;
+            textBox.CaretIndex = textBox.Text.Length;
+            _isDateFormatting = false;
+        }
+
+        private void PassportTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not TextBox textBox)
+            {
+                return;
+            }
+
+            textBox.Text = new string(textBox.Text.Where(char.IsDigit).Take(10).ToArray());
+            textBox.CaretIndex = textBox.Text.Length;
+        }
+
+        private static bool IsDigitsExactLength(string? value, int length)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var digitsOnly = value.Trim();
+            return digitsOnly.Length == length && digitsOnly.All(char.IsDigit);
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+    }
+
+    public record PositionOption(int Id, string Name);
+}

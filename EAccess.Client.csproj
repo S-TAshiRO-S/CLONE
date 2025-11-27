@@ -10,16 +10,24 @@
 
   <ItemGroup>
     <None Remove="fonts\Ali-Bold.ttf" />
+    <None Remove="pictures\export.png" />
     <None Remove="pictures\logo.png" />
+    <None Remove="pictures\printer.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="pictures\export.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="fonts\Ali-Bold.ttf" />
     <Resource Include="pictures\logo.png" />
+    <Resource Include="pictures\printer.png" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="QuestPDF" Version="2024.6.0" />
   </ItemGroup>
 
 </Project>

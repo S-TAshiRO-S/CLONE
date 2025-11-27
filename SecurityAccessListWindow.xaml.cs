@@ -55,7 +55,9 @@ namespace EAccess.Client
 
         private void BtnReports_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Отчёты", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var reportsWindow = new SecurityReportsWindow(_eventName, _startDate, _endDate, _location, _userFullName);
+            reportsWindow.Show();
+            Close();
         }
 
         private void BtnControlAudit_Click(object sender, RoutedEventArgs e)

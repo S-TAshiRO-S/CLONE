@@ -270,5 +270,8 @@ namespace EAccess.Client
         }
     }
 
-    public record PositionOption(int Id, string Name);
+    public record PositionOption(int Id, string Name)
+    {
+        public override string ToString() => Name;
+    }
 }

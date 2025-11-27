@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -83,7 +84,51 @@ namespace EAccess.Client
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Заглушка: удалить запись", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (AccessDataGrid.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Выберите хотя бы одну запись для удаления.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_connectionString))
+            {
+                MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var selectedEntries = AccessDataGrid.SelectedItems.Cast<AccessEntry>().ToList();
+            var confirmationMessage = selectedEntries.Count == 1
+                ? $"Удалить запись для {selectedEntries[0].LastName} {selectedEntries[0].FirstName}?"
+                : $"Удалить выбранные {selectedEntries.Count} записей?";
+
+            var result = MessageBox.Show(confirmationMessage, "Подтверждение удаления", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                connection.Open();
+
+                using var transaction = connection.BeginTransaction();
+                const string deleteQuery = "DELETE FROM AccessList WHERE AccessID = @AccessId";
+
+                foreach (var entry in selectedEntries)
+                {
+                    using var command = new SqlCommand(deleteQuery, connection, transaction);
+                    command.Parameters.AddWithValue("@AccessId", entry.AccessId);
+                    command.ExecuteNonQuery();
+                }
+
+                transaction.Commit();
+                LoadAccessEntries();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при удалении записей: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void AccessDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)

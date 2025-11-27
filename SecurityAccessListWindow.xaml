@@ -163,7 +163,7 @@
                            FontWeight="Bold" HorizontalAlignment="Right" Margin="0,20,20,20"/>
 
                 <Border Grid.Row="1" Background="#333849" CornerRadius="18" Padding="12" Margin="20,10,20,20">
-                    <DataGrid x:Name="AccessDataGrid" Style="{StaticResource AccessListGridStyle}" ItemsSource="{Binding AccessEntries}">
+                    <DataGrid x:Name="AccessDataGrid" Style="{StaticResource AccessListGridStyle}" ItemsSource="{Binding AccessEntries}" MouseDoubleClick="AccessDataGrid_MouseDoubleClick">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Фамилия" Binding="{Binding LastName}" Width="150">
                                 <DataGridTextColumn.HeaderStyle>

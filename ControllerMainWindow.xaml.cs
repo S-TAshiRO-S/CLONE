@@ -49,7 +49,9 @@ namespace EAccess.Client
 
         private void BtnQrBarcode_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Раздел работы с QR / штрих кодами для контролёра доступа будет добавлен позже.", "Раздел в разработке", MessageBoxButton.OK, MessageBoxImage.Information);
+            var qrWindow = new ControllerQrWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            qrWindow.Show();
+            Close();
         }
 
         private void BtnAudit_Click(object sender, RoutedEventArgs e)

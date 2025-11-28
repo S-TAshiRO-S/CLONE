@@ -117,7 +117,7 @@
                            FontFamily="{StaticResource AppFont}" FontSize="36" Foreground="{StaticResource WhiteBrush}"
                            FontWeight="Bold" HorizontalAlignment="Right" Margin="0,20,20,20"/>
 
-                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="640">
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="806">
                     <TextBlock Text="Отсканируйте QR или штрих-код"
                                Style="{StaticResource LabelText}" FontSize="32" HorizontalAlignment="Center"
                                Margin="0,0,0,20"/>

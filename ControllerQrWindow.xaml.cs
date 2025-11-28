@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -42,6 +43,7 @@ namespace EAccess.Client
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            ForceEnglishKeyboardLayout();
             HiddenInput.Focus();
         }
 
@@ -82,6 +84,8 @@ namespace EAccess.Client
         {
             try
             {
+                ForceEnglishKeyboardLayout();
+
                 var cleanedPayload = NormalizePayload(payload);
                 var noteBuilder = new StringBuilder();
 
@@ -330,6 +334,18 @@ namespace EAccess.Client
         {
             using var sha = SHA256.Create();
             return sha.ComputeHash(Encoding.UTF8.GetBytes(payload));
+        }
+
+        private static void ForceEnglishKeyboardLayout()
+        {
+            try
+            {
+                InputLanguageManager.Current.CurrentInputLanguage = CultureInfo.GetCultureInfo("en-US");
+            }
+            catch
+            {
+                // Если переключение раскладки не удается (например, недоступен язык), продолжаю использовать текущую раскладку.
+            }
         }
 
         private void ShowApproved(AccessEntry entry, string? note = null)

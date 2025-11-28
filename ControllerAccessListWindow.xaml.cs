@@ -75,7 +75,9 @@ namespace EAccess.Client
 
         private void BtnAudit_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Окно аудита для контролёра доступа будет добавлено позже.", "Раздел в разработке", MessageBoxButton.OK, MessageBoxImage.Information);
+            var auditWindow = new ControllerAuditWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            auditWindow.Show();
+            Close();
         }
 
         private void BtnPrint_Click(object sender, RoutedEventArgs e)

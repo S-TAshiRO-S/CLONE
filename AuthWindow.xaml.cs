@@ -139,6 +139,28 @@ namespace EAccess.Client
                         popup.ShowDialog();
                     }
                 }
+                else if (string.Equals(role, "Контроллер доступа", StringComparison.OrdinalIgnoreCase))
+                {
+                    reader.Close();
+                    var activeEvent = GetActiveEvent(connection);
+
+                    if (activeEvent.HasValue)
+                    {
+                        var evt = activeEvent.Value;
+                        var controllerWindow = new ControllerMainWindow(evt.EventName, evt.StartDate, evt.EndDate, evt.Location, fullName, userId);
+                        controllerWindow.Show();
+                        Close();
+                    }
+                    else
+                    {
+                        var popup = new NoEventPopup
+                        {
+                            Owner = this
+                        };
+
+                        popup.ShowDialog();
+                    }
+                }
                 else
                 {
                     ShowUserNotFoundMessage();

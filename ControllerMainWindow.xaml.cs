@@ -1,0 +1,63 @@
+﻿using System;
+using System.Windows;
+
+namespace EAccess.Client
+{
+    public partial class ControllerMainWindow : Window
+    {
+        private readonly string _eventName;
+        private readonly DateTime? _startDate;
+        private readonly DateTime? _endDate;
+        private readonly string? _location;
+        private readonly string _userFullName;
+        private readonly int _userId;
+
+        public ControllerMainWindow(string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName, int userId)
+        {
+            InitializeComponent();
+
+            _eventName = eventName;
+            _startDate = startDate;
+            _endDate = endDate;
+            _location = location;
+            _userFullName = userFullName;
+            _userId = userId;
+
+            EventTitleText.Text = eventName;
+            UserFullNameTextBlock.Text = userFullName;
+            StartDateText.Text = FormatDate(startDate);
+            EndDateText.Text = FormatDate(endDate);
+            LocationText.Text = string.IsNullOrWhiteSpace(location) ? string.Empty : location;
+        }
+
+        private void BtnMain_Click(object sender, RoutedEventArgs e)
+        {
+            var popup = new AlreadyOnPage
+            {
+                Owner = this
+            };
+
+            popup.ShowDialog();
+        }
+
+        private void BtnAccessList_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Страница списка допусков для контролёра доступа будет добавлена позже.", "Раздел в разработке", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnQrBarcode_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Раздел работы с QR / штрих кодами для контролёра доступа будет добавлен позже.", "Раздел в разработке", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnAudit_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Окно аудита для контролёра доступа будет добавлено позже.", "Раздел в разработке", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private static string FormatDate(DateTime? date)
+        {
+            return date.HasValue ? date.Value.ToString("dd.MM.yyyy") : string.Empty;
+        }
+    }
+}

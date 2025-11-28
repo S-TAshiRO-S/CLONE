@@ -4,8 +4,10 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace EAccess.Client
 {
@@ -80,46 +82,64 @@ namespace EAccess.Client
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(payload))
+                var cleanedPayload = NormalizePayload(payload);
+
+                if (string.IsNullOrWhiteSpace(cleanedPayload))
                 {
                     ShowNotFound("Отсканированный код пустой.");
                     return;
                 }
 
-                var accessId = ParseAccessId(payload);
-                if (!accessId.HasValue)
+                var incomingHash = ComputeHash(cleanedPayload);
+                var accessId = ParseAccessId(cleanedPayload) ?? ParseAccessId(payload);
+                var lookup = accessId.HasValue ? TryLoadAccessEntry(accessId.Value) : null;
+
+                if (lookup == null)
                 {
-                    ShowNotFound("В коде не найден идентификатор пользователя.");
-                    return;
+                    lookup = TryLoadAccessEntryByHash(incomingHash);
                 }
 
-                var entry = TryLoadAccessEntry(accessId.Value, out var qrHash);
-                if (entry == null)
+                if (lookup == null)
                 {
                     ShowNotFound("Пользователь не найден в системе.");
                     return;
                 }
 
-                if (qrHash is { Length: > 0 })
+                var today = DateTime.Today;
+                var isWithinAccreditation = today >= lookup.Entry.AccredStart.Date && today <= lookup.Entry.AccredEnd.Date;
+
+                var noteBuilder = new StringBuilder();
+                if (!string.Equals(payload, cleanedPayload, StringComparison.Ordinal))
                 {
-                    var incomingHash = ComputeHash(payload);
-                    if (!incomingHash.SequenceEqual(qrHash))
+                    noteBuilder.Append("Считанный код очищен от лишних символов. ");
+                }
+
+                if (lookup.StoredHash is { Length: > 0 })
+                {
+                    var expectedPayload = BuildPayload(lookup.Entry);
+                    var expectedHash = ComputeHash(expectedPayload);
+
+                    if (!expectedHash.SequenceEqual(lookup.StoredHash))
                     {
-                        ShowDenied(entry, "QR-код не совпадает с данными в системе.");
-                        return;
+                        noteBuilder.Append("QR в базе не совпадает с текущими данными записи. ");
+                    }
+                    else if (!incomingHash.SequenceEqual(lookup.StoredHash))
+                    {
+                        noteBuilder.Append("Содержимое QR-кода отличается от сохранённого, использованы данные из базы. ");
                     }
                 }
 
-                var today = DateTime.Today;
-                var isWithinAccreditation = today >= entry.AccredStart.Date && today <= entry.AccredEnd.Date;
+                var note = noteBuilder.ToString().Trim();
 
                 if (isWithinAccreditation)
                 {
-                    ShowApproved(entry);
+                    ShowApproved(lookup.Entry, note);
                 }
                 else
                 {
-                    ShowDenied(entry, "Срок аккредитации не действует на текущую дату.");
+                    ShowDenied(lookup.Entry, string.IsNullOrWhiteSpace(note)
+                        ? "Срок аккредитации не действует на текущую дату."
+                        : $"{note}Срок аккредитации не действует на текущую дату.");
                 }
             }
             finally
@@ -128,17 +148,46 @@ namespace EAccess.Client
             }
         }
 
+        private static string NormalizePayload(string payload)
+        {
+            var builder = new StringBuilder(payload.Length);
+
+            foreach (var ch in payload)
+            {
+                if (char.IsControl(ch) && ch != '\r' && ch != '\n')
+                {
+                    continue;
+                }
+
+                builder.Append(ch);
+            }
+
+            return builder.ToString().Trim();
+        }
+
         private static int? ParseAccessId(string payload)
         {
+            var directMatch = Regex.Match(payload, @"AccessID\D*(\d+)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            if (directMatch.Success && int.TryParse(directMatch.Groups[1].Value, out var directId))
+            {
+                return directId;
+            }
+
             var lines = payload.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)
             {
-                if (line.StartsWith("AccessID:", StringComparison.OrdinalIgnoreCase))
+                if (line.Contains("AccessID", StringComparison.OrdinalIgnoreCase))
                 {
-                    var value = line.Split(':', 2).Skip(1).FirstOrDefault();
-                    if (int.TryParse(value, out var id))
+                    var match = Regex.Match(line, @"AccessID\s*[:=]?\s*(\d+)", RegexOptions.IgnoreCase);
+                    if (match.Success && int.TryParse(match.Groups[1].Value, out var idFromMatch))
                     {
-                        return id;
+                        return idFromMatch;
+                    }
+
+                    var digits = new string(line.Where(char.IsDigit).ToArray());
+                    if (int.TryParse(digits, out var digitsOnlyId))
+                    {
+                        return digitsOnlyId;
                     }
                 }
             }
@@ -151,10 +200,8 @@ namespace EAccess.Client
             return null;
         }
 
-        private AccessEntry? TryLoadAccessEntry(int accessId, out byte[]? qrHash)
+        private AccessLookupResult? TryLoadAccessEntry(int accessId)
         {
-            qrHash = null;
-
             if (string.IsNullOrWhiteSpace(_connectionString))
             {
                 MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -177,19 +224,71 @@ namespace EAccess.Client
                 using var reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    qrHash = reader["QRHash"] as byte[];
-
-                    return new AccessEntry
+                    return new AccessLookupResult
                     {
-                        AccessId = reader.GetInt32(reader.GetOrdinal("AccessID")),
-                        LastName = reader["LastName"] as string ?? string.Empty,
-                        FirstName = reader["FirstName"] as string ?? string.Empty,
-                        MiddleName = reader["MiddleName"] as string,
-                        Phone = reader["Phone"] as string ?? string.Empty,
-                        Passport = reader["Passport"] as string ?? string.Empty,
-                        Position = reader["PositionName"] as string ?? string.Empty,
-                        AccredStart = reader.GetDateTime(reader.GetOrdinal("AccredStart")),
-                        AccredEnd = reader.GetDateTime(reader.GetOrdinal("AccredEnd"))
+                        Entry = new AccessEntry
+                        {
+                            AccessId = reader.GetInt32(reader.GetOrdinal("AccessID")),
+                            LastName = reader["LastName"] as string ?? string.Empty,
+                            FirstName = reader["FirstName"] as string ?? string.Empty,
+                            MiddleName = reader["MiddleName"] as string,
+                            Phone = reader["Phone"] as string ?? string.Empty,
+                            Passport = reader["Passport"] as string ?? string.Empty,
+                            Position = reader["PositionName"] as string ?? string.Empty,
+                            AccredStart = reader.GetDateTime(reader.GetOrdinal("AccredStart")),
+                            AccredEnd = reader.GetDateTime(reader.GetOrdinal("AccredEnd"))
+                        },
+                        StoredHash = reader["QRHash"] as byte[]
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при проверке данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return null;
+        }
+
+        private AccessLookupResult? TryLoadAccessEntryByHash(byte[] incomingHash)
+        {
+            if (string.IsNullOrWhiteSpace(_connectionString))
+            {
+                MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
+
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                connection.Open();
+
+                const string query = @"SELECT TOP 1 a.AccessID, a.LastName, a.FirstName, a.MiddleName, a.Phone, a.Passport, p.PositionName, a.AccredStart, a.AccredEnd, a.QRHash
+                                       FROM AccessList a
+                                       INNER JOIN Positions p ON a.PositionID = p.PositionID
+                                       WHERE a.QRHash = @QrHash";
+
+                using var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@QrHash", incomingHash);
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new AccessLookupResult
+                    {
+                        Entry = new AccessEntry
+                        {
+                            AccessId = reader.GetInt32(reader.GetOrdinal("AccessID")),
+                            LastName = reader["LastName"] as string ?? string.Empty,
+                            FirstName = reader["FirstName"] as string ?? string.Empty,
+                            MiddleName = reader["MiddleName"] as string,
+                            Phone = reader["Phone"] as string ?? string.Empty,
+                            Passport = reader["Passport"] as string ?? string.Empty,
+                            Position = reader["PositionName"] as string ?? string.Empty,
+                            AccredStart = reader.GetDateTime(reader.GetOrdinal("AccredStart")),
+                            AccredEnd = reader.GetDateTime(reader.GetOrdinal("AccredEnd"))
+                        },
+                        StoredHash = reader["QRHash"] as byte[]
                     };
                 }
             }
@@ -207,19 +306,23 @@ namespace EAccess.Client
             return sha.ComputeHash(Encoding.UTF8.GetBytes(payload));
         }
 
-        private void ShowApproved(AccessEntry entry)
+        private void ShowApproved(AccessEntry entry, string? note = null)
         {
             ResultBorder.Visibility = Visibility.Visible;
-            ResultBorder.Background = (System.Windows.Media.Brush)FindResource("SuccessBrush");
+            ScanPlaceholderBorder.Visibility = Visibility.Collapsed;
+            ResultBorder.Background = Brushes.Transparent;
+            StatusText.Foreground = (Brush)FindResource("SuccessBrush");
             StatusText.Text = "ДОСТУП: РАЗРЕШЕН";
             UpdatePersonData(entry);
-            NoteText.Text = "";
+            NoteText.Text = note ?? "";
         }
 
         private void ShowDenied(AccessEntry entry, string reason)
         {
             ResultBorder.Visibility = Visibility.Visible;
-            ResultBorder.Background = (System.Windows.Media.Brush)FindResource("ErrorBrush");
+            ScanPlaceholderBorder.Visibility = Visibility.Collapsed;
+            ResultBorder.Background = Brushes.Transparent;
+            StatusText.Foreground = (Brush)FindResource("ErrorBrush");
             StatusText.Text = "ДОСТУП: ЗАПРЕЩЕН";
             UpdatePersonData(entry);
             NoteText.Text = reason;
@@ -228,13 +331,29 @@ namespace EAccess.Client
         private void ShowNotFound(string reason)
         {
             ResultBorder.Visibility = Visibility.Visible;
-            ResultBorder.Background = (System.Windows.Media.Brush)FindResource("NeutralBrush");
+            ScanPlaceholderBorder.Visibility = Visibility.Collapsed;
+            ResultBorder.Background = Brushes.Transparent;
+            StatusText.Foreground = (Brush)FindResource("NeutralBrush");
             StatusText.Text = "ДОСТУП: НЕ НАЙДЕНО В СИСТЕМЕ";
             FullNameText.Text = "Фамилия Имя Отчество: -";
             PositionText.Text = "Должность: -";
             PassportText.Text = "Паспорт: -";
             AccreditationText.Text = "Аккредитация: -";
             NoteText.Text = reason;
+        }
+
+        private string BuildPayload(AccessEntry entry)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine($"AccessID:{entry.AccessId}");
+            builder.AppendLine($"LastName:{entry.LastName}");
+            builder.AppendLine($"FirstName:{entry.FirstName}");
+            builder.AppendLine($"MiddleName:{entry.MiddleName}");
+            builder.AppendLine($"Phone:{entry.Phone}");
+            builder.AppendLine($"AccredStart:{entry.AccredStart:yyyy-MM-dd}");
+            builder.AppendLine($"AccredEnd:{entry.AccredEnd:yyyy-MM-dd}");
+            builder.AppendLine($"Event:{_eventName}");
+            return builder.ToString();
         }
 
         private void UpdatePersonData(AccessEntry entry)
@@ -276,5 +395,11 @@ namespace EAccess.Client
             auditWindow.Show();
             Close();
         }
+    }
+
+    internal sealed class AccessLookupResult
+    {
+        public required AccessEntry Entry { get; init; }
+        public byte[]? StoredHash { get; init; }
     }
 }

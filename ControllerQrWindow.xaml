@@ -117,39 +117,38 @@
                            FontFamily="{StaticResource AppFont}" FontSize="36" Foreground="{StaticResource WhiteBrush}"
                            FontWeight="Bold" HorizontalAlignment="Right" Margin="0,20,20,20"/>
 
-                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="640">
                     <TextBlock Text="Отсканируйте QR или штрих-код"
                                Style="{StaticResource LabelText}" FontSize="32" HorizontalAlignment="Center"
                                Margin="0,0,0,20"/>
 
-                    <Border Width="520" Height="520" Background="#3A3F50" CornerRadius="24" Padding="18" Margin="0,0,0,20">
-                        <Grid>
-                            <Rectangle Fill="#4A5061" RadiusX="16" RadiusY="16"/>
-                            <Rectangle Fill="#2D3240" RadiusX="12" RadiusY="12" Margin="18"/>
-                            <Rectangle Height="4" Fill="#E25959" VerticalAlignment="Center" Margin="28,0,28,0"/>
+                    <Border x:Name="ScanPlaceholderBorder" Background="#3A3F50" CornerRadius="16" Padding="28" Visibility="Visible">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,12">
+                            <Rectangle Height="5" Fill="#E25959" RadiusX="2" RadiusY="2" Width="320" HorizontalAlignment="Center" Margin="0,0,0,18"/>
                             <TextBlock Text="Сканируйте код"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Foreground="{StaticResource WhiteBrush}"
-                                       FontFamily="{StaticResource AppFont}" FontSize="24"/>
-                        </Grid>
+                                       FontFamily="{StaticResource AppFont}" FontSize="28"/>
+                        </StackPanel>
                     </Border>
 
-                    <Border x:Name="ResultBorder" Width="520" Padding="20" CornerRadius="18"
-                            Background="{StaticResource NeutralBrush}" Visibility="Collapsed" Margin="0,0,0,12">
-                        <StackPanel>
+                    <Border x:Name="ResultBorder" Padding="12,10" CornerRadius="10" Background="Transparent"
+        Visibility="Collapsed" BorderBrush="Transparent" BorderThickness="0" Margin="0,0,0,6">
+                        <StackPanel HorizontalAlignment="Center">
                             <TextBlock x:Name="StatusText" Text="ДОСТУП"
-                                       FontFamily="{StaticResource AppFont}" FontSize="34" FontWeight="Bold"
-                                       Foreground="{StaticResource WhiteBrush}" Margin="0,0,0,8"/>
+                   FontFamily="{StaticResource AppFont}" FontSize="28" FontWeight="Bold"
+                   Foreground="{StaticResource WhiteBrush}" Margin="0,0,0,14" TextAlignment="Center"/>
                             <TextBlock x:Name="FullNameText" Text="Фамилия Имя Отчество: -"
-                                       Style="{StaticResource InfoText}" Margin="0,0,0,4"/>
+                                       Style="{StaticResource InfoText}" FontSize="28" Margin="0,0,0,8" TextAlignment="Center"/>
                             <TextBlock x:Name="PositionText" Text="Должность: -"
-                                       Style="{StaticResource InfoText}" Margin="0,0,0,4"/>
+                                       Style="{StaticResource InfoText}" FontSize="26" Margin="0,0,0,8" TextAlignment="Center"/>
                             <TextBlock x:Name="PassportText" Text="Паспорт: -"
-                                       Style="{StaticResource InfoText}" Margin="0,0,0,4"/>
+                                       Style="{StaticResource InfoText}" FontSize="26" Margin="0,0,0,8" TextAlignment="Center"/>
                             <TextBlock x:Name="AccreditationText" Text="Аккредитация: -"
-                                       Style="{StaticResource InfoText}" Margin="0,0,0,4"/>
+                                       Style="{StaticResource InfoText}" FontSize="26" Margin="0,0,0,10" TextAlignment="Center"/>
                             <TextBlock x:Name="NoteText" Text=""
-                                       Style="{StaticResource InfoText}" FontSize="18" Opacity="0.86" Margin="0,0,0,4"/>
+                                       Style="{StaticResource InfoText}" FontSize="22" Opacity="0.92" TextWrapping="Wrap"
+                                       Margin="0,0,0,4" TextAlignment="Center"/>
                         </StackPanel>
                     </Border>
 

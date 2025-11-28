@@ -42,7 +42,9 @@ namespace EAccess.Client
 
         private void BtnAccessList_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Страница списка допусков для контролёра доступа будет добавлена позже.", "Раздел в разработке", MessageBoxButton.OK, MessageBoxImage.Information);
+            var accessListWindow = new ControllerAccessListWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            accessListWindow.Show();
+            Close();
         }
 
         private void BtnQrBarcode_Click(object sender, RoutedEventArgs e)

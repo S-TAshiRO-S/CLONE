@@ -14,14 +14,16 @@ namespace EAccess.Client
     {
         private readonly string _connectionString;
         private readonly AccessEntry? _existingEntry;
+        private readonly int _actorUserId;
         private bool _isDateFormatting;
 
-        public AddEditAccessWindow(string connectionString, AccessEntry? entry = null)
+        public AddEditAccessWindow(string connectionString, int actorUserId, string actorFullName, AccessEntry? entry = null)
         {
             InitializeComponent();
 
             _connectionString = connectionString;
             _existingEntry = entry;
+            _actorUserId = actorUserId;
 
             LoadPositions();
             PopulateFieldsIfEdit();
@@ -92,6 +94,12 @@ namespace EAccess.Client
 
             var phoneWithoutCode = PhoneTextBox.Text.Trim();
             var phoneWithCountryCode = $"8{phoneWithoutCode}";
+            var lastName = LastNameTextBox.Text.Trim();
+            var firstName = FirstNameTextBox.Text.Trim();
+            var middleName = string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) ? null : MiddleNameTextBox.Text.Trim();
+            var passport = PassportTextBox.Text.Trim();
+            var positionName = (PositionComboBox.SelectedItem as PositionOption)?.Name ?? string.Empty;
+            var fullName = AccessListFormatting.FormatFullName(lastName, firstName, middleName);
 
             try
             {
@@ -104,16 +112,18 @@ namespace EAccess.Client
                                                  VALUES (@LastName, @FirstName, @MiddleName, @Phone, @Passport, @PositionId, @AccredStart, @AccredEnd)";
 
                     using var command = new SqlCommand(insertQuery, connection);
-                    command.Parameters.AddWithValue("@LastName", LastNameTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@FirstName", FirstNameTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@MiddleName", string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) ? DBNull.Value : MiddleNameTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@LastName", lastName);
+                    command.Parameters.AddWithValue("@FirstName", firstName);
+                    command.Parameters.AddWithValue("@MiddleName", string.IsNullOrWhiteSpace(middleName) ? DBNull.Value : middleName);
                     command.Parameters.AddWithValue("@Phone", phoneWithCountryCode);
-                    command.Parameters.AddWithValue("@Passport", PassportTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@Passport", passport);
                     command.Parameters.AddWithValue("@PositionId", positionId);
                     command.Parameters.AddWithValue("@AccredStart", startDate);
                     command.Parameters.AddWithValue("@AccredEnd", endDate);
 
                     command.ExecuteNonQuery();
+
+                    InsertAuditRecord(connection, $"[ДОБАВЛЕНО] Добавил пользователя: {fullName}");
                 }
                 else
                 {
@@ -122,17 +132,26 @@ namespace EAccess.Client
                                                  WHERE AccessID = @AccessId";
 
                     using var command = new SqlCommand(updateQuery, connection);
-                    command.Parameters.AddWithValue("@LastName", LastNameTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@FirstName", FirstNameTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@MiddleName", string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) ? DBNull.Value : MiddleNameTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@LastName", lastName);
+                    command.Parameters.AddWithValue("@FirstName", firstName);
+                    command.Parameters.AddWithValue("@MiddleName", string.IsNullOrWhiteSpace(middleName) ? DBNull.Value : middleName); ;
                     command.Parameters.AddWithValue("@Phone", phoneWithCountryCode);
-                    command.Parameters.AddWithValue("@Passport", PassportTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@Passport", passport);
                     command.Parameters.AddWithValue("@PositionId", positionId);
                     command.Parameters.AddWithValue("@AccredStart", startDate);
                     command.Parameters.AddWithValue("@AccredEnd", endDate);
                     command.Parameters.AddWithValue("@AccessId", _existingEntry.AccessId);
 
                     command.ExecuteNonQuery();
+
+                    var changes = BuildChangeList(_existingEntry, lastName, firstName, middleName, phoneWithCountryCode, passport, positionName, startDate, endDate);
+                    if (changes.Count > 0)
+                    {
+                        var originalFullName = AccessListFormatting.FormatFullName(_existingEntry.LastName, _existingEntry.FirstName, _existingEntry.MiddleName);
+                        var changeSummary = string.Join("; ", changes);
+                        var note = $"Изменил данные у: {originalFullName} (ИЗМЕНЕНО: {changeSummary})";
+                        InsertAuditRecord(connection, note);
+                    }
                 }
 
                 DialogResult = true;
@@ -142,6 +161,65 @@ namespace EAccess.Client
             {
                 MessageBox.Show($"Не удалось сохранить запись: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private static List<string> BuildChangeList(AccessEntry original, string newLastName, string newFirstName, string? newMiddleName, string newPhone, string newPassport, string newPositionName, DateTime newStart, DateTime newEnd)
+        {
+            var changes = new List<string>();
+
+            if (!string.Equals(original.LastName, newLastName, StringComparison.Ordinal))
+            {
+                changes.Add($"Фамилия {original.LastName} на {newLastName}");
+            }
+
+            if (!string.Equals(original.FirstName, newFirstName, StringComparison.Ordinal))
+            {
+                changes.Add($"Имя {original.FirstName} на {newFirstName}");
+            }
+
+            if (!string.Equals(original.MiddleName ?? string.Empty, newMiddleName ?? string.Empty, StringComparison.Ordinal))
+            {
+                var fromValue = string.IsNullOrWhiteSpace(original.MiddleName) ? "(пусто)" : original.MiddleName;
+                var toValue = string.IsNullOrWhiteSpace(newMiddleName) ? "(пусто)" : newMiddleName;
+                changes.Add($"Отчество {fromValue} на {toValue}");
+            }
+
+            if (!string.Equals(original.Phone, newPhone, StringComparison.Ordinal))
+            {
+                changes.Add($"Телефон {original.Phone} на {newPhone}");
+            }
+
+            if (!string.Equals(original.Passport, newPassport, StringComparison.Ordinal))
+            {
+                changes.Add($"Паспорт {original.Passport} на {newPassport}");
+            }
+
+            if (!string.Equals(original.Position, newPositionName, StringComparison.Ordinal))
+            {
+                changes.Add($"Должность {original.Position} на {newPositionName}");
+            }
+
+            if (original.AccredStart.Date != newStart.Date)
+            {
+                changes.Add($"Аккредитация с {original.AccredStart:dd.MM.yyyy} на {newStart:dd.MM.yyyy}");
+            }
+
+            if (original.AccredEnd.Date != newEnd.Date)
+            {
+                changes.Add($"Аккредитация по {original.AccredEnd:dd.MM.yyyy} на {newEnd:dd.MM.yyyy}");
+            }
+
+            return changes;
+        }
+
+        private void InsertAuditRecord(SqlConnection connection, string note)
+        {
+            const string auditQuery = "INSERT INTO SecurityAudit (UserID, Note) VALUES (@UserId, @Note)";
+
+            using var command = new SqlCommand(auditQuery, connection);
+            command.Parameters.AddWithValue("@UserId", _actorUserId);
+            command.Parameters.AddWithValue("@Note", note);
+            command.ExecuteNonQuery();
         }
 
         private bool TryValidate(out DateTime accredStart, out DateTime accredEnd, out int positionId)

@@ -25,6 +25,7 @@ namespace EAccess.Client
         private readonly DateTime? _endDate;
         private readonly string? _location;
         private readonly string _userFullName;
+        private readonly int _userId;
         private readonly string? _connectionString;
 
         private readonly List<AccessEntry> _allEntries = new();
@@ -93,7 +94,7 @@ namespace EAccess.Client
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public SecurityReportsWindow(string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName)
+        public SecurityReportsWindow(string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName, int userId)
         {
             InitializeComponent();
             DataContext = this;
@@ -103,6 +104,7 @@ namespace EAccess.Client
             _endDate = endDate;
             _location = location;
             _userFullName = userFullName;
+            _userId = userId;
             _connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString;
 
             UserFullNameTextBlock.Text = userFullName;
@@ -115,14 +117,14 @@ namespace EAccess.Client
 
         private void BtnMain_Click(object sender, RoutedEventArgs e)
         {
-            var mainWindow = new SecurityMainWindow(_eventName, _startDate, _endDate, _location, _userFullName);
+            var mainWindow = new SecurityMainWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
             mainWindow.Show();
             Close();
         }
 
         private void BtnAccessList_Click(object sender, RoutedEventArgs e)
         {
-            var accessListWindow = new SecurityAccessListWindow(_eventName, _startDate, _endDate, _location, _userFullName);
+            var accessListWindow = new SecurityAccessListWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
             accessListWindow.Show();
             Close();
         }
@@ -139,7 +141,9 @@ namespace EAccess.Client
 
         private void BtnControlAudit_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Контроль / Аудит", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var auditWindow = new SecurityAuditWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            auditWindow.Show();
+            Close();
         }
 
         private void BtnExport_Click(object sender, RoutedEventArgs e)

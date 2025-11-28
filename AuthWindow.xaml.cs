@@ -79,6 +79,7 @@ namespace EAccess.Client
                     return;
                 }
 
+                var userId = reader.GetInt32(reader.GetOrdinal("UserID"));
                 var storedHash = reader["PasswordHash"] as byte[] ?? Array.Empty<byte>();
                 string role = reader["Role"] as string ?? string.Empty;
                 string lastName = reader["LastName"] as string ?? string.Empty;
@@ -124,7 +125,7 @@ namespace EAccess.Client
                     if (activeEvent.HasValue)
                     {
                         var evt = activeEvent.Value;
-                        var securityWindow = new SecurityMainWindow(evt.EventName, evt.StartDate, evt.EndDate, evt.Location, fullName);
+                        var securityWindow = new SecurityMainWindow(evt.EventName, evt.StartDate, evt.EndDate, evt.Location, fullName, userId);
                         securityWindow.Show();
                         Close();
                     }

@@ -10,8 +10,9 @@ namespace EAccess.Client
         private readonly DateTime? _endDate;
         private readonly string? _location;
         private readonly string _userFullName;
+        private readonly int _userId;
 
-        public SecurityMainWindow(string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName)
+        public SecurityMainWindow(string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName, int userId)
         {
             InitializeComponent();
 
@@ -20,6 +21,7 @@ namespace EAccess.Client
             _endDate = endDate;
             _location = location;
             _userFullName = userFullName;
+            _userId = userId;
 
             EventTitleText.Text = eventName;
             UserFullNameTextBlock.Text = userFullName;
@@ -40,21 +42,23 @@ namespace EAccess.Client
 
         private void BtnAccessList_Click(object sender, RoutedEventArgs e)
         {
-            var accessListWindow = new SecurityAccessListWindow(_eventName, _startDate, _endDate, _location, _userFullName);
+            var accessListWindow = new SecurityAccessListWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
             accessListWindow.Show();
             Close();
         }
 
         private void BtnReports_Click(object sender, RoutedEventArgs e)
         {
-            var reportsWindow = new SecurityReportsWindow(_eventName, _startDate, _endDate, _location, _userFullName);
+            var reportsWindow = new SecurityReportsWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
             reportsWindow.Show();
             Close();
         }
 
         private void BtnControlAudit_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Контроль / Аудит", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var auditWindow = new SecurityAuditWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            auditWindow.Show();
+            Close();
         }
 
         private static string FormatDate(DateTime? date)

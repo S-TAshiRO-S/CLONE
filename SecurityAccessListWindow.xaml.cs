@@ -17,9 +17,10 @@ namespace EAccess.Client
         private readonly DateTime? _endDate;
         private readonly string? _location;
         private readonly string _userFullName;
+        private readonly int _userId;
         private readonly string? _connectionString;
 
-        public SecurityAccessListWindow(string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName)
+        public SecurityAccessListWindow(string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName, int userId)
         {
             InitializeComponent();
             DataContext = this;
@@ -29,6 +30,7 @@ namespace EAccess.Client
             _endDate = endDate;
             _location = location;
             _userFullName = userFullName;
+            _userId = userId;
             _connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString;
 
             UserFullNameTextBlock.Text = userFullName;
@@ -38,7 +40,7 @@ namespace EAccess.Client
 
         private void BtnMain_Click(object sender, RoutedEventArgs e)
         {
-            var mainWindow = new SecurityMainWindow(_eventName, _startDate, _endDate, _location, _userFullName);
+            var mainWindow = new SecurityMainWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
             mainWindow.Show();
             Close();
         }
@@ -55,14 +57,16 @@ namespace EAccess.Client
 
         private void BtnReports_Click(object sender, RoutedEventArgs e)
         {
-            var reportsWindow = new SecurityReportsWindow(_eventName, _startDate, _endDate, _location, _userFullName);
+            var reportsWindow = new SecurityReportsWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
             reportsWindow.Show();
             Close();
         }
 
         private void BtnControlAudit_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Контроль / Аудит", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var auditWindow = new SecurityAuditWindow(_eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            auditWindow.Show();
+            Close();
         }
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
@@ -73,7 +77,7 @@ namespace EAccess.Client
                 return;
             }
 
-            var popup = new AddEditAccessWindow(_connectionString)
+            var popup = new AddEditAccessWindow(_connectionString, _userId, _userFullName)
             {
                 Owner = this
             };
@@ -116,12 +120,22 @@ namespace EAccess.Client
 
                 using var transaction = connection.BeginTransaction();
                 const string deleteQuery = "DELETE FROM AccessList WHERE AccessID = @AccessId";
+                const string auditQuery = "INSERT INTO SecurityAudit (UserID, Note) VALUES (@UserId, @Note)";
 
                 foreach (var entry in selectedEntries)
                 {
-                    using var command = new SqlCommand(deleteQuery, connection, transaction);
-                    command.Parameters.AddWithValue("@AccessId", entry.AccessId);
-                    command.ExecuteNonQuery();
+                    using (var command = new SqlCommand(deleteQuery, connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@AccessId", entry.AccessId);
+                        command.ExecuteNonQuery();
+                    }
+
+                    using (var auditCommand = new SqlCommand(auditQuery, connection, transaction))
+                    {
+                        auditCommand.Parameters.AddWithValue("@UserId", _userId);
+                        auditCommand.Parameters.AddWithValue("@Note", $"[УДАЛЕНО] Удалил пользователя: {AccessListFormatting.FormatFullName(entry.LastName, entry.FirstName, entry.MiddleName)}");
+                        auditCommand.ExecuteNonQuery();
+                    }
                 }
 
                 transaction.Commit();
@@ -146,7 +160,7 @@ namespace EAccess.Client
                 return;
             }
 
-            var popup = new AddEditAccessWindow(_connectionString, entry)
+            var popup = new AddEditAccessWindow(_connectionString, _userId, _userFullName, entry)
             {
                 Owner = this
             };
@@ -216,5 +230,15 @@ namespace EAccess.Client
         public DateTime AccredEnd { get; set; }
 
         public string AccreditationRange => $"с {AccredStart:dd.MM.yyyy} по {AccredEnd:dd.MM.yyyy}";
+    }
+
+    internal static class AccessListFormatting
+    {
+        public static string FormatFullName(string lastName, string firstName, string? middleName)
+        {
+            return string.IsNullOrWhiteSpace(middleName)
+                ? $"{lastName} {firstName}"
+                : $"{lastName} {firstName} {middleName}";
+        }
     }
 }

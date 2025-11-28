@@ -98,9 +98,17 @@ namespace EAccess.Client
 
             try
             {
-                var badgePayloads = selectedEntries.Select(entry => new BadgePayload(entry, BuildPayload(entry))).ToList();
-                var qrImages = badgePayloads.Select(payload => GenerateQrCode(payload.Payload)).ToList();
-                var qrHashes = badgePayloads.Select(payload => ComputeHash(payload.Payload)).ToList();
+                var badgePayloads = selectedEntries
+                    .Select(entry =>
+                    {
+                        var rawPayload = BuildPayload(entry);
+                        var encodedPayload = EncodePayloadBase64(rawPayload);
+                        return new BadgePayload(entry, rawPayload, encodedPayload);
+                    })
+                    .ToList();
+
+                var qrImages = badgePayloads.Select(payload => GenerateQrCode(payload.EncodedPayload)).ToList();
+                var qrHashes = badgePayloads.Select(payload => ComputeHash(payload.RawPayload)).ToList();
 
                 SaveQrHashes(selectedEntries, qrHashes);
 
@@ -166,6 +174,12 @@ namespace EAccess.Client
             using var qrData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
             var pngQrCode = new PngByteQRCode(qrData);
             return pngQrCode.GetGraphic(20);
+        }
+
+        private static string EncodePayloadBase64(string rawPayload)
+        {
+            var bytes = Encoding.UTF8.GetBytes(rawPayload);
+            return Convert.ToBase64String(bytes);
         }
 
         private static byte[] ComputeHash(string payload)
@@ -288,7 +302,7 @@ namespace EAccess.Client
             }
         }
 
-        private record BadgePayload(AccessEntry Entry, string Payload);
+        private record BadgePayload(AccessEntry Entry, string RawPayload, string EncodedPayload);
 
         private record BadgeContent(AccessEntry Entry, byte[] QrCodeBytes);
     }

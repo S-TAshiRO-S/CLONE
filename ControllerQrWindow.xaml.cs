@@ -83,11 +83,18 @@ namespace EAccess.Client
             try
             {
                 var cleanedPayload = NormalizePayload(payload);
+                var noteBuilder = new StringBuilder();
 
                 if (string.IsNullOrWhiteSpace(cleanedPayload))
                 {
                     ShowNotFound("Отсканированный код пустой.");
                     return;
+                }
+
+                var decodedPayload = TryDecodeBase64(cleanedPayload);
+                if (!string.IsNullOrWhiteSpace(decodedPayload))
+                {
+                    cleanedPayload = decodedPayload!;
                 }
 
                 var incomingHash = ComputeHash(cleanedPayload);
@@ -107,12 +114,6 @@ namespace EAccess.Client
 
                 var today = DateTime.Today;
                 var isWithinAccreditation = today >= lookup.Entry.AccredStart.Date && today <= lookup.Entry.AccredEnd.Date;
-
-                var noteBuilder = new StringBuilder();
-                if (!string.Equals(payload, cleanedPayload, StringComparison.Ordinal))
-                {
-                    noteBuilder.Append("Считанный код очищен от лишних символов. ");
-                }
 
                 if (lookup.StoredHash is { Length: > 0 })
                 {
@@ -198,6 +199,31 @@ namespace EAccess.Client
             }
 
             return null;
+        }
+
+        private static string? TryDecodeBase64(string payload)
+        {
+            var compact = new string(payload.Where(ch => !char.IsWhiteSpace(ch)).ToArray());
+            if (compact.Length < 8 || compact.Length % 4 != 0)
+            {
+                return null;
+            }
+
+            if (!Regex.IsMatch(compact, @"^[A-Za-z0-9+/=]+$"))
+            {
+                return null;
+            }
+
+            try
+            {
+                var bytes = Convert.FromBase64String(compact);
+                var decoded = Encoding.UTF8.GetString(bytes);
+                return string.IsNullOrWhiteSpace(decoded) ? null : decoded;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private AccessLookupResult? TryLoadAccessEntry(int accessId)

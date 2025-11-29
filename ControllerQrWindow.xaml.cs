@@ -112,7 +112,9 @@ namespace EAccess.Client
 
                 if (lookup == null)
                 {
-                    ShowNotFound("Пользователь не найден в системе.");
+                    const string unknownAttempt = "Попытка входа неизвестного человека";
+                    SaveAccessAudit(unknownAttempt);
+                    ShowNotFound(unknownAttempt);
                     return;
                 }
 
@@ -136,12 +138,16 @@ namespace EAccess.Client
 
                 var note = noteBuilder.ToString().Trim();
 
+                var fullName = AccessListFormatting.FormatFullName(lookup.Entry.LastName, lookup.Entry.FirstName, lookup.Entry.MiddleName);
+
                 if (isWithinAccreditation)
                 {
+                    SaveAccessAudit($"ВХОД РАЗРЕШЕН: {lookup.Entry.Position} {fullName}");
                     ShowApproved(lookup.Entry, note);
                 }
                 else
                 {
+                    SaveAccessAudit($"ВХОД ЗАПРЕШЕН: {lookup.Entry.Position} {fullName}");
                     ShowDenied(lookup.Entry, string.IsNullOrWhiteSpace(note)
                         ? "Срок аккредитации не действует на текущую дату."
                         : $"{note}Срок аккредитации не действует на текущую дату.");
@@ -396,6 +402,31 @@ namespace EAccess.Client
             builder.AppendLine($"AccredEnd:{entry.AccredEnd:yyyy-MM-dd}");
             builder.AppendLine($"Event:{_eventName}");
             return builder.ToString();
+        }
+
+        private void SaveAccessAudit(string note)
+        {
+            if (string.IsNullOrWhiteSpace(_connectionString))
+            {
+                MessageBox.Show("Строка подключения к базе данных не настроена.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                connection.Open();
+
+                const string query = "INSERT INTO AccessAudit (UserID, Note) VALUES (@UserId, @Note)";
+                using var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@UserId", _userId);
+                command.Parameters.AddWithValue("@Note", note);
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении аудита: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void UpdatePersonData(AccessEntry entry)

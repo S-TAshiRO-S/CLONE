@@ -111,7 +111,7 @@ namespace EAccess.Client
                     }
                     else
                     {
-                        var organizerWindow = new MainOrganizerWindow(fullName);
+                        var organizerWindow = new MainOrganizerWindow(fullName, userId);
                         organizerWindow.Show();
                     }
 

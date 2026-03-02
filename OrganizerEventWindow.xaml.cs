@@ -137,50 +137,29 @@ namespace EAccess.Client
         private void EndEventButton_Click(object sender, RoutedEventArgs e)
         {
             if (!EnsureConnection())
-            {
                 return;
-            }
+
+            var confirm = MessageBox.Show(
+                "Завершить мероприятие?",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes)
+                return;
 
             try
             {
                 using var connection = new SqlConnection(_connectionString);
                 connection.Open();
 
-                using var transaction = connection.BeginTransaction();
+                using var cmd = new SqlCommand("UPDATE Events SET IsActive = 0 WHERE EventID = @id", connection);
+                cmd.Parameters.AddWithValue("@id", _eventId);
+                cmd.ExecuteNonQuery();
 
-                try
-                {
-                    using (var deactivate = new SqlCommand("UPDATE Events SET IsActive = 0 WHERE EventID = @id", connection, transaction))
-                    {
-                        deactivate.Parameters.AddWithValue("@id", _eventId);
-                        deactivate.ExecuteNonQuery();
-                    }
+                MessageBox.Show("Мероприятие завершено.", "Сохранение", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    var cleanupCommands = new[]
-                    {
-                        "DELETE FROM AccessAudit",
-                        "DELETE FROM SecurityAudit",
-                        "DELETE FROM AccessList",
-                        "DELETE FROM Events"
-                    };
-
-                    foreach (var commandText in cleanupCommands)
-                    {
-                        using var cmd = new SqlCommand(commandText, connection, transaction);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    transaction.Commit();
-                }
-                catch
-                {
-                    transaction.Rollback();
-                    throw;
-                }
-
-                MessageBox.Show("Мероприятие завершено. Данные очищены", "Сохранение", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                var main = new MainOrganizerWindow(UserFullNameTextBlock.Text);
+                var main = new MainOrganizerWindow(_userFullName, _userId);
                 main.Show();
                 Close();
             }

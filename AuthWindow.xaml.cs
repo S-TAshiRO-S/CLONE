@@ -106,7 +106,7 @@ namespace EAccess.Client
                     if (activeEvent.HasValue)
                     {
                         var evt = activeEvent.Value;
-                        var activeWindow = new OrganizerEventWindow(evt.EventId, evt.EventName, evt.StartDate, evt.EndDate, evt.Location, fullName);
+                        var activeWindow = new OrganizerEventWindow(evt.EventId, evt.EventName, evt.StartDate, evt.EndDate, evt.Location, fullName, userId);
                         activeWindow.Show();
                     }
                     else
@@ -245,7 +245,7 @@ namespace EAccess.Client
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            string text = values.Length > 0 ? values[0] as string : null;
+            string? text = values.Length > 0 ? values[0] as string : null;
             bool isFocused = values.Length > 1 && values[1] is bool b && b;
 
             bool show = string.IsNullOrEmpty(text) && !isFocused;

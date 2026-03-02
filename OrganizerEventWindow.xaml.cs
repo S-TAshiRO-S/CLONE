@@ -17,16 +17,24 @@ namespace EAccess.Client
         private DateTime? _startDate;
         private DateTime? _endDate;
         private string? _location;
+        private readonly string _eventName;
+        private readonly string _userFullName;
+        private readonly int _userId;
 
-        public OrganizerEventWindow(int eventId, string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName)
+        public OrganizerEventWindow(int eventId, string eventName, DateTime? startDate, DateTime? endDate, string? location, string userFullName, int userId)
         {
             InitializeComponent();
 
             _eventId = eventId;
             _connectionString = ConfigurationManager.ConnectionStrings["EAccessDb"]?.ConnectionString ?? string.Empty;
+
             _startDate = startDate;
             _endDate = endDate;
             _location = location;
+
+            _eventName = eventName;
+            _userFullName = userFullName;
+            _userId = userId;
 
             EventTitleText.Text = eventName;
             UserFullNameTextBlock.Text = userFullName;
@@ -47,7 +55,9 @@ namespace EAccess.Client
 
         private void BtnBudget_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Смета", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var wnd = new OrganizerBudgetWindow(_eventId, _eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            wnd.Show();
+            Close();
         }
 
         private void BtnReports_Click(object sender, RoutedEventArgs e)

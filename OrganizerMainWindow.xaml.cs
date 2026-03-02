@@ -5,19 +5,26 @@ namespace EAccess.Client
 {
     public partial class MainOrganizerWindow : Window
     {
-        // Можно передавать сюда ФИО при создании окна
         public string UserFullName { get; set; }
 
-        public MainOrganizerWindow() : this("Фамилия Имя Отчество")
+        private readonly int _userId;
+
+        public MainOrganizerWindow() : this("Фамилия Имя Отчество", 0)
         {
         }
 
-        // Конструктор с передачей имени пользователя (вызови из AuthWindow после логина)
-        public MainOrganizerWindow(string userFullName)
+        public MainOrganizerWindow(string userFullName) : this(userFullName, 0)
+        {
+        }
+
+        public MainOrganizerWindow(string userFullName, int userId)
         {
             InitializeComponent();
+
             UserFullName = userFullName ?? "Фамилия Имя Отчество";
             UserFullNameTextBlock.Text = UserFullName;
+
+            _userId = userId;
         }
 
         private void BtnMain_Click(object sender, RoutedEventArgs e)
@@ -75,7 +82,8 @@ namespace EAccess.Client
                     null,
                     null,
                     null,
-                    UserFullName);
+                    UserFullName,
+                    _userId);
 
                 eventWindow.Show();
                 Close();

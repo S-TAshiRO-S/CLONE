@@ -62,7 +62,9 @@ namespace EAccess.Client
 
         private void BtnReports_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Отчёты", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var wnd = new OrganizerReportsWindow(_eventId, _eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            wnd.Show();
+            Close();
         }
 
         private void BtnAudit_Click(object sender, RoutedEventArgs e)

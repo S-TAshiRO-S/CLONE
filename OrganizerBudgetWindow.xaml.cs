@@ -181,7 +181,9 @@ ORDER BY pi.PurchaseItemID DESC;";
 
         private void BtnReports_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Отчёты будут добавлены позже.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+            var wnd = new OrganizerReportsWindow(_eventId, _eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            wnd.Show();
+            Close();
         }
 
         private void BtnAudit_Click(object sender, RoutedEventArgs e)

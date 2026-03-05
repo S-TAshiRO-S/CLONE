@@ -417,7 +417,9 @@ ORDER BY pi.PurchaseItemID DESC;";
 
         private void BtnAudit_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Аудит будет добавлен позже.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+            var wnd = new OrganizerAuditWindow(_eventId, _eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            wnd.Show();
+            Close();
         }
     }
 }

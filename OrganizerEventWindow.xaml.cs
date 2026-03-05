@@ -69,7 +69,9 @@ namespace EAccess.Client
 
         private void BtnAudit_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Вы нажали: Аудит", "Действие", MessageBoxButton.OK, MessageBoxImage.Information);
+            var wnd = new OrganizerAuditWindow(_eventId, _eventName, _startDate, _endDate, _location, _userFullName, _userId);
+            wnd.Show();
+            Close();
         }
 
         private void StartDateTextBox_LostFocus(object sender, RoutedEventArgs e)

@@ -72,7 +72,6 @@
             </Setter>
         </Style>
 
-        <!-- ComboBox без системных подсветок -->
         <Style x:Key="NiceComboBox" TargetType="ComboBox">
             <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
             <Setter Property="FontSize" Value="20"/>
@@ -102,7 +101,6 @@
                                               ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                               ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"/>
 
-                            <!-- Стрелка без синей подсветки -->
                             <ToggleButton x:Name="Tg"
                                           Focusable="False"
                                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
@@ -135,7 +133,6 @@
                                 </ToggleButton.Template>
                             </ToggleButton>
 
-                            <!-- Выпадающий список по ширине поля -->
                             <Popup x:Name="Popup"
                                    Placement="Bottom"
                                    IsOpen="{TemplateBinding IsDropDownOpen}"
@@ -197,7 +194,6 @@
         </Style>
     </Window.Resources>
 
-    <!-- Рамка с углами 25 -->
     <Border Background="{StaticResource PrimaryBrush}" CornerRadius="25" Padding="24">
         <Grid>
             <Grid.RowDefinitions>
@@ -205,14 +201,12 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Верх -->
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="220"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Лого + Страж (строго под логотипом) -->
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                     <Image Source="pack://application:,,,/EAccess.Client;component/pictures/logo.png"
                            Width="110" Height="96" Margin="0,0,0,8"/>
@@ -224,21 +218,18 @@
                                HorizontalAlignment="Center"/>
                 </StackPanel>
 
-                <!-- Кнопки -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
                     <Button Content="Отмена" Style="{StaticResource Btn}" Click="Cancel_Click" Margin="0,0,24,0"/>
                     <Button Content="Сохранить" Style="{StaticResource Btn}" Click="Save_Click"/>
                 </StackPanel>
             </Grid>
 
-            <!-- Контент -->
             <Grid Grid.Row="1" Margin="0,18,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Лево -->
                 <StackPanel Grid.Column="0" Margin="0,0,18,0">
                     <TextBlock Text="Наименование:" Style="{StaticResource LabelText}" Margin="0,0,0,6"/>
                     <TextBox x:Name="NameTextBox" Style="{StaticResource InputTextBox}" Margin="0,0,0,14"/>
@@ -256,7 +247,6 @@
                               SelectedValuePath="Id"/>
                 </StackPanel>
 
-                <!-- Право -->
                 <StackPanel Grid.Column="1" Margin="18,0,0,0">
                     <TextBlock Text="Поставщик:" Style="{StaticResource LabelText}" Margin="0,0,0,6"/>
                     <TextBox x:Name="SupplierTextBox" Style="{StaticResource InputTextBox}" Margin="0,0,0,14"/>

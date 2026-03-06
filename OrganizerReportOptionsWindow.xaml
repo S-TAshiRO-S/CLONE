@@ -51,7 +51,6 @@
             </Setter>
         </Style>
 
-        <!-- Тёмный ComboBox (как в SecurityReportsWindow) -->
         <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
             <Style.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#4A5164"/>
@@ -175,7 +174,6 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Индикатор -->
                                 <Grid Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left">
                                     <Ellipse Width="18" Height="18"
                                      Stroke="#9AA3B6"
@@ -190,7 +188,6 @@
                                     </Ellipse>
                                 </Grid>
 
-                                <!-- Текст -->
                                 <ContentPresenter Grid.Column="1"
                                           VerticalAlignment="Center"
                                           HorizontalAlignment="Left"/>

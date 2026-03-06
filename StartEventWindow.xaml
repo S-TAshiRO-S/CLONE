@@ -9,7 +9,6 @@
         AllowsTransparency="True"
         Background="Transparent">
     <Window.Resources>
-        <!-- Цвета -->
         <Color x:Key="PrimaryColor1">#F54B64</Color>
         <Color x:Key="PrimaryColor2">#F78361</Color>
         <SolidColorBrush x:Key="SecondaryBrush" Color="#2A2E3A"/>
@@ -22,10 +21,8 @@
             <GradientStop Color="{StaticResource PrimaryColor2}" Offset="1"/>
         </LinearGradientBrush>
 
-        <!-- Шрифт -->
         <FontFamily x:Key="AppFont">pack://application:,,,/EAccess.Client;component/fonts/#Ali-Bold</FontFamily>
 
-        <!-- Кнопка: стиль с градиентом и закруглениями -->
         <Style x:Key="PrimaryRoundedButton" TargetType="Button">
             <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
             <Setter Property="FontWeight" Value="Bold"/>

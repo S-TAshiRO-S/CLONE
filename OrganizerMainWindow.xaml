@@ -15,7 +15,6 @@
         <Color x:Key="PrimaryColor2">#F78361</Color>
         <SolidColorBrush x:Key="PrimaryGradientBrush">
             <SolidColorBrush.Color>
-                <!-- временный однотонный; ниже используем LinearGradientBrush в стиле кнопки -->
                 #F54B64
             </SolidColorBrush.Color>
         </SolidColorBrush>
@@ -28,10 +27,8 @@
         <SolidColorBrush x:Key="DarkGreyBrush" Color="#4E586E"/>
         <SolidColorBrush x:Key="WhiteBrush" Color="#FFFFFF"/>
 
-        <!-- Шрифт (если App.xaml уже содержит AppFont, можно убрать эту строку) -->
         <FontFamily x:Key="AppFont">pack://application:,,,/EAccess.Client;component/fonts/#Ali-Bold</FontFamily>
 
-        <!-- Кнопка: стиль с градиентом и закруглениями -->
         <Style x:Key="PrimaryRoundedButton" TargetType="Button">
             <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -49,13 +46,11 @@
                                 SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <!-- можно добавить Trigger-ы (MouseOver) при желании -->
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
-        <!-- Большая правая кнопка (Начать мероприятие) -->
         <Style x:Key="StartEventButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryRoundedButton}">
             <Setter Property="FontSize" Value="28"/>
             <Setter Property="Padding" Value="22,12"/>
@@ -70,7 +65,6 @@
             </Setter>
         </Style>
 
-        <!-- Малые кнопки меню слева -->
         <Style x:Key="SidebarMenuButton" TargetType="Button" BasedOn="{StaticResource PrimaryRoundedButton}">
             <Setter Property="Width" Value="220"/>
             <Setter Property="Height" Value="46"/>
@@ -81,7 +75,6 @@
 
     </Window.Resources>
 
-    <!-- Общая сетка: две колонки -->
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350"/>
@@ -99,7 +92,6 @@
                     <RowDefinition Height="*"/>
                     <!-- кнопки -->
                     <RowDefinition Height="Auto"/>
-                    <!-- кнопка Начать мероприятие (левая колонка, но мы разместим справа) -->
                 </Grid.RowDefinitions>
 
                 <!-- Логотип и название -->
@@ -141,29 +133,23 @@
 
         <!-- Правая рабочая область -->
         <Grid Grid.Column="1" Background="{StaticResource SecondaryBrush}">
-            <!-- Верхняя панель: ФИО пользователя справа -->
             <Grid Margin="24">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- пустое место слева для выравнивания -->
                 <StackPanel Grid.Column="0"/>
 
-                <!-- ФИО -->
                 <TextBlock x:Name="UserFullNameTextBlock" Grid.Column="1" Text="Фамилия Имя Отчество"
                            FontFamily="{StaticResource AppFont}" FontSize="36" Foreground="{StaticResource WhiteBrush}"
                            FontWeight="Bold" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,50,60
                            ,0"/>
             </Grid>
 
-            <!-- Контент placeholder (в будущем сюда загрузим страницы) -->
             <Border Margin="32,88,32,88" Background="Transparent" CornerRadius="6" BorderBrush="#00000000">
-                <!-- Тут будет основной контент -->
             </Border>
 
-            <!-- Кнопка "Начать мероприятие" внизу справа -->
             <Button x:Name="BtnStartEvent" Content="Начать мероприятие" Width="320" Height="64"
                     Style="{StaticResource StartEventButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                     Margin="0,0,65,50" Click="BtnStartEvent_Click"/>

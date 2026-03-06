@@ -281,7 +281,6 @@ namespace EAccess.Client
 
         private static string EscapeCsvAsText(string value)
         {
-            // Форматируем как строку Excel, чтобы не терялись ведущие нули и не включалась экспонента
             var escaped = EscapeCsv(value);
             if (!escaped.StartsWith('"'))
             {

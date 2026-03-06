@@ -51,7 +51,6 @@
             <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
 
-        <!-- Заголовки таблицы -->
         <Style x:Key="BudgetColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -64,7 +63,6 @@
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
         </Style>
 
-        <!-- Ячейки таблицы: текст слева -->
         <Style x:Key="BudgetCellTextStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
             <Setter Property="Foreground" Value="{StaticResource WhiteBrush}"/>

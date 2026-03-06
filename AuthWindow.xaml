@@ -13,7 +13,6 @@
         Background="#2A2E3A">
 
     <Window.Resources>
-        <!-- Цвета -->
         <Color x:Key="PrimaryColor1">#F54B64</Color>
         <Color x:Key="PrimaryColor2">#F78361</Color>
         <SolidColorBrush x:Key="SecondaryBrush" Color="#2A2E3A"/>
@@ -41,7 +40,6 @@
             <Setter Property="FontSize" Value="20"/>
         </Style>
 
-        <!-- Кнопка входа без стандартной подсветки при наведении -->
         <Style x:Key="LoginButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -60,12 +58,10 @@
             </Setter>
         </Style>
         
-        <!-- Серый текст -->
         <local:TextEmptyAndNotFocusedToVisibilityConverter x:Key="PlaceholderConverter"/>
     </Window.Resources>
 
     <Grid>
-        <!-- Центрируем основные блоки вертикально -->
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="60">
 
             <!-- Логотип -->
@@ -81,21 +77,18 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="80" />
-                    <!-- отступ между колонками -->
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Левая колонка -->
                 <StackPanel Grid.Column="0" HorizontalAlignment="Stretch">
                     <TextBlock Text="Логин:" Style="{StaticResource SmallLabelStyle}" FontSize="48" FontWeight="Bold"/>
-                    <!-- Обёртка для скруглённого поля -->
                     <Border x:Name="LoginBorder" Background="{StaticResource DarkGreyBrush}" CornerRadius="18"
                             Padding="18" Height="56">
                         <Grid>
                             <TextBox x:Name="LoginTextBox" Background="Transparent" BorderThickness="0"
                                      VerticalContentAlignment="Center" FontFamily="{StaticResource AppFont}"
                                      Foreground="{StaticResource WhiteBrush}" FontSize="20"/>
-                            <!-- Серый текст про логин -->
                             <TextBlock Text="Введите логин" IsHitTestVisible="False" VerticalAlignment="Center" Margin="6,0,0,0"
                                        FontFamily="{StaticResource AppFont}" FontSize="20" Foreground="#9BA3B3" Height="20">
                                 <TextBlock.Visibility>
@@ -120,7 +113,6 @@
                                          Foreground="{StaticResource WhiteBrush}" FontSize="20"
                                          PasswordChanged="PasswordBox_PasswordChanged"
                                          GotFocus="PasswordBox_GotFocus" LostFocus="PasswordBox_LostFocus"/>
-                            <!-- Серый текст про пароль -->
                             <TextBlock x:Name="PasswordPlaceholder" Text="Введите пароль"
                                        VerticalAlignment="Center" Margin="6,0,0,0" FontFamily="{StaticResource AppFont}"
                                        FontSize="20" Foreground="#9BA3B3" MouseDown="PasswordPlaceholder_MouseDown"/>

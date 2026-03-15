@@ -417,17 +417,28 @@ namespace EAccess.Client
                 using var connection = new SqlConnection(_connectionString);
                 connection.Open();
 
-                const string query = "INSERT INTO AccessAudit (UserID, Note) VALUES (@UserId, @Note)";
+                const string query = @"
+INSERT INTO AccessAudit (EventID, UserID, Note)
+SELECT TOP (1) EventID, @UserId, @Note
+FROM Events
+WHERE IsActive = 1;";
+
                 using var command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@UserId", _userId);
-                command.Parameters.AddWithValue("@Note", note);
-                command.ExecuteNonQuery();
+                command.Parameters.AddWithValue("@Note", note ?? "");
+
+                var rows = command.ExecuteNonQuery();
+                if (rows == 0)
+                {
+                    MessageBox.Show("Нет активного мероприятия (IsActive = 1). Аудит не записан.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при сохранении аудита: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private void UpdatePersonData(AccessEntry entry)
         {

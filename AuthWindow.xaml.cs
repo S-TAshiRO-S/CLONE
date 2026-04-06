@@ -15,7 +15,6 @@ namespace EAccess.Client
 {
     public partial class AuthWindow : Window
     {
-        // цвета для ошибки
         private static readonly Brush ErrorBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0x5A, 0x6B)); 
         private static readonly Brush NormalLoginBorder = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E586E"));
         private static readonly Brush NormalPasswordBorder = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4E586E"));
@@ -31,13 +30,12 @@ namespace EAccess.Client
             bool loginEmpty = string.IsNullOrWhiteSpace(LoginTextBox.Text);
             bool pwdEmpty = string.IsNullOrEmpty(PasswordBox.Password);
 
-            // Сбрасываем рамки
             LoginBorder.BorderThickness = new Thickness(0);
             PasswordBorder.BorderThickness = new Thickness(0);
 
             if (loginEmpty || pwdEmpty)
             {
-                // Пометить ошибочные поля красной рамкой
+                // Помечаю ошибочные поля красной рамкой
                 if (loginEmpty)
                 {
                     LoginBorder.BorderBrush = ErrorBrush;

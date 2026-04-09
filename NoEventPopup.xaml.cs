@@ -10,6 +10,7 @@ namespace EAccess.Client
         public NoEventPopup()
         {
             InitializeComponent();
+            // тест гитхаба
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)

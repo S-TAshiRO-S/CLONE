@@ -162,7 +162,28 @@ WHERE PurchaseItemID=@Id;";
 
                     purchaseItemId = _edit.PurchaseItemId;
 
-                    InsertAudit(connection, tr, purchaseItemId, $"[ИЗМЕНЕНО] {name}");
+                    var changes = new System.Collections.Generic.List<string>();
+
+                    if (!string.Equals(_edit.Name, name, StringComparison.Ordinal))
+                        changes.Add($"Наименование: с {_edit.Name} на {name}");
+
+                    if (!string.Equals(_edit.Supplier, supplier, StringComparison.Ordinal))
+                        changes.Add($"Поставщик: с {_edit.Supplier} на {supplier}");
+
+                    if (_edit.Quantity != qty)
+                        changes.Add($"Количество: с {_edit.Quantity} на {qty}");
+
+                    if (_edit.Price != price)
+                        changes.Add($"Цена: с {_edit.Price:N0} на {price:N0}");
+
+                    if (!string.Equals(_edit.StatusName, (Statuses.FirstOrDefault(x => x.Id == statusId)?.Name ?? string.Empty), StringComparison.Ordinal))
+                        changes.Add($"Статус: с {_edit.StatusName} на {Statuses.FirstOrDefault(x => x.Id == statusId)?.Name}");
+
+                    var auditNote = changes.Count > 0
+                        ? $"[ИЗМЕНЕНО] Изменил данные у: {_edit.Name} (ИЗМЕНЕНО: {string.Join("; ", changes)})"
+                        : $"[ИЗМЕНЕНО] Изменил данные у: {_edit.Name} (без изменений)";
+
+                    InsertAudit(connection, tr, purchaseItemId, auditNote);
                 }
 
                 tr.Commit();

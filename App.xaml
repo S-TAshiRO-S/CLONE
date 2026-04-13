@@ -4,6 +4,60 @@
              xmlns:local="clr-namespace:EAccess.Client"
              StartupUri="AuthWindow.xaml">
     <Application.Resources>
-         
+
+        <!-- Основные цвета приложения -->
+        <Color x:Key="PrimaryColor1">#F54B64</Color>
+        <Color x:Key="PrimaryColor2">#F78361</Color>
+        <SolidColorBrush x:Key="SecondaryBrush" Color="#2A2E3A"/>
+        <SolidColorBrush x:Key="DarkGreyBrush" Color="#4E586E"/>
+        <SolidColorBrush x:Key="WhiteBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="OverlayBrush" Color="#B3000000"/>
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#2A2E3A"/>
+
+        <!-- Основной градиент кнопок -->
+        <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="{StaticResource PrimaryColor1}" Offset="0"/>
+            <GradientStop Color="{StaticResource PrimaryColor2}" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="PrimaryButtonGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="{StaticResource PrimaryColor1}" Offset="0"/>
+            <GradientStop Color="{StaticResource PrimaryColor2}" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Шрифт приложения -->
+        <FontFamily x:Key="AppFont">pack://application:,,,/EAccess.Client;component/fonts/#Ali-Bold</FontFamily>
+
+        <!-- Стиль основной кнопки -->
+        <Style x:Key="PrimaryRoundedButton" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource WhiteBrush}"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="Background" Value="{StaticResource PrimaryButtonGradient}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль кнопки бокового меню -->
+        <Style x:Key="SidebarMenuButton" TargetType="Button" BasedOn="{StaticResource PrimaryRoundedButton}">
+            <Setter Property="Width" Value="220"/>
+            <Setter Property="Height" Value="46"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+
     </Application.Resources>
 </Application>

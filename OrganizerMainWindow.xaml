@@ -10,9 +10,6 @@
         Background="#2A2E3A">
 
     <Window.Resources>
-        <!-- Цвета -->
-        <Color x:Key="PrimaryColor1">#F54B64</Color>
-        <Color x:Key="PrimaryColor2">#F78361</Color>
         <SolidColorBrush x:Key="PrimaryGradientBrush">
             <SolidColorBrush.Color>
                 #F54B64
@@ -22,12 +19,6 @@
             <GradientStop Color="#F54B64" Offset="0"/>
             <GradientStop Color="#F78361" Offset="1"/>
         </LinearGradientBrush>
-
-        <SolidColorBrush x:Key="SecondaryBrush" Color="#2A2E3A"/>
-        <SolidColorBrush x:Key="DarkGreyBrush" Color="#4E586E"/>
-        <SolidColorBrush x:Key="WhiteBrush" Color="#FFFFFF"/>
-
-        <FontFamily x:Key="AppFont">pack://application:,,,/EAccess.Client;component/fonts/#Ali-Bold</FontFamily>
 
         <Style x:Key="PrimaryRoundedButton" TargetType="Button">
             <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>

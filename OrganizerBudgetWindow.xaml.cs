@@ -253,15 +253,25 @@ ORDER BY pi.PurchaseItemID DESC;";
 
                 foreach (var item in selected)
                 {
-                    using (var check = new SqlCommand("SELECT COUNT(1) FROM PurchaseAudit WHERE PurchaseItemID = @id", connection, tr))
+                    // Проверяю статус — если "Куплено" то удалять нельзя
+                    using (var check = new SqlCommand(
+                        @"SELECT ps.StatusName
+                          FROM PurchaseItems pi
+                          JOIN PurchaseStatuses ps ON ps.StatusID = pi.StatusID
+                          WHERE pi.PurchaseItemID = @id", connection, tr))
                     {
                         check.Parameters.AddWithValue("@id", item.PurchaseItemId);
-                        var cnt = Convert.ToInt32(check.ExecuteScalar());
-                        if (cnt > 0)
-                            throw new InvalidOperationException("Нельзя удалить позицию, т.к. по ней уже есть записи аудита.");
+                        var statusName = check.ExecuteScalar() as string ?? string.Empty;
+
+                        if (string.Equals(statusName, "Куплено", StringComparison.OrdinalIgnoreCase))
+                            throw new InvalidOperationException(
+                                $"Нельзя удалить \"{item.Name}\" — статус \"Куплено\".\n" +
+                                "Сначала измените статус на другой, затем удалите.");
                     }
 
-                    using (var del = new SqlCommand("DELETE FROM PurchaseItems WHERE PurchaseItemID = @id", connection, tr))
+                    // Удаляю позицию
+                    using (var del = new SqlCommand(
+                        "DELETE FROM PurchaseItems WHERE PurchaseItemID = @id", connection, tr))
                     {
                         del.Parameters.AddWithValue("@id", item.PurchaseItemId);
                         del.ExecuteNonQuery();
@@ -273,7 +283,7 @@ ORDER BY pi.PurchaseItemID DESC;";
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Невозможно удалить", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

@@ -120,7 +120,9 @@ namespace EAccess.Client
 
                 using var transaction = connection.BeginTransaction();
                 const string deleteQuery = "DELETE FROM AccessList WHERE AccessID = @AccessId";
-                const string auditQuery = "INSERT INTO SecurityAudit (UserID, Note) VALUES (@UserId, @Note)";
+                const string auditQuery = @"INSERT INTO SecurityAudit (EventID, UserID, Note)
+SELECT TOP 1 EventID, @UserId, @Note
+FROM Events WHERE IsActive = 1";
 
                 foreach (var entry in selectedEntries)
                 {

@@ -108,8 +108,9 @@ namespace EAccess.Client
 
                 if (_existingEntry is null)
                 {
-                    const string insertQuery = @"INSERT INTO AccessList (LastName, FirstName, MiddleName, Phone, Passport, PositionID, AccredStart, AccredEnd)
-                                                 VALUES (@LastName, @FirstName, @MiddleName, @Phone, @Passport, @PositionId, @AccredStart, @AccredEnd)";
+                    const string insertQuery = @"INSERT INTO AccessList (EventID, LastName, FirstName, MiddleName, Phone, Passport, PositionID, AccredStart, AccredEnd)
+SELECT TOP 1 e.EventID, @LastName, @FirstName, @MiddleName, @Phone, @Passport, @PositionId, @AccredStart, @AccredEnd
+FROM Events e WHERE e.IsActive = 1";
 
                     using var command = new SqlCommand(insertQuery, connection);
                     command.Parameters.AddWithValue("@LastName", lastName);
@@ -159,7 +160,13 @@ namespace EAccess.Client
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Не удалось сохранить запись: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                var message = ex.Message;
+                if (message.Contains("Passport") || message.Contains("UQ_AccessList_Passport"))
+                    MessageBox.Show("Человек с таким номером паспорта уже есть в списке допусков.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                else if (message.Contains("Phone") || message.Contains("UQ_AccessList_Phone"))
+                    MessageBox.Show("Человек с таким номером телефона уже есть в списке допусков.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                else
+                    MessageBox.Show($"Не удалось сохранить запись: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -214,7 +221,9 @@ namespace EAccess.Client
 
         private void InsertAuditRecord(SqlConnection connection, string note)
         {
-            const string auditQuery = "INSERT INTO SecurityAudit (UserID, Note) VALUES (@UserId, @Note)";
+            const string auditQuery = @"INSERT INTO SecurityAudit (EventID, UserID, Note)
+SELECT TOP 1 EventID, @UserId, @Note
+FROM Events WHERE IsActive = 1";
 
             using var command = new SqlCommand(auditQuery, connection);
             command.Parameters.AddWithValue("@UserId", _actorUserId);

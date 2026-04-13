@@ -9,19 +9,11 @@
         AllowsTransparency="True"
         Background="Transparent">
     <Window.Resources>
-        <Color x:Key="PrimaryColor1">#F54B64</Color>
-        <Color x:Key="PrimaryColor2">#F78361</Color>
-        <SolidColorBrush x:Key="SecondaryBrush" Color="#2A2E3A"/>
-        <SolidColorBrush x:Key="DarkGreyBrush" Color="#4E586E"/>
-        <SolidColorBrush x:Key="WhiteBrush" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="OverlayBrush" Color="#B3000000"/>
-
         <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="{StaticResource PrimaryColor1}" Offset="0"/>
             <GradientStop Color="{StaticResource PrimaryColor2}" Offset="1"/>
         </LinearGradientBrush>
-
-        <FontFamily x:Key="AppFont">pack://application:,,,/EAccess.Client;component/fonts/#Ali-Bold</FontFamily>
 
         <Style x:Key="PrimaryRoundedButton" TargetType="Button">
             <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>

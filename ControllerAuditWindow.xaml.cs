@@ -97,8 +97,8 @@ namespace EAccess.Client
                 var exportFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "EAccessExports");
                 Directory.CreateDirectory(exportFolder);
 
-                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
-                var pdfPath = Path.Combine(exportFolder, $"ControllerAudit_{timestamp}.pdf");
+                var timestamp = DateTime.Now.ToString("ddMMyyyy_HHmmss", CultureInfo.InvariantCulture);
+                var pdfPath = Path.Combine(exportFolder, $"Аудит_Контролёр_{timestamp}.pdf");
 
                 ExportToPdf(pdfPath, FilteredAuditEntries.ToList());
 

@@ -1,0 +1,55 @@
+<Window x:Class="EAccess.Client.SecurityAnalyticsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Аналитика допусков"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent">
+
+    <Grid Background="{StaticResource OverlayBrush}">
+        <Border Background="#2A2E3A" CornerRadius="24" Padding="36"
+                Width="600" MaxHeight="680"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Text="Аналитика допусков"
+                           FontFamily="{StaticResource AppFont}"
+                           FontSize="36" FontWeight="Bold"
+                           Foreground="{StaticResource WhiteBrush}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,24"/>
+
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top">
+                    <TextBlock Text="По должностям"
+                               FontFamily="{StaticResource AppFont}"
+                               FontSize="22" FontWeight="Bold"
+                               Foreground="{StaticResource WhiteBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,10"/>
+                    <Canvas x:Name="PositionChartCanvas" Width="220" Height="220" HorizontalAlignment="Center"/>
+                    <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,12,0,0">
+                        <StackPanel x:Name="PositionLegend" HorizontalAlignment="Center"/>
+                    </ScrollViewer>
+                </StackPanel>
+
+                <Button Grid.Row="2"
+                        Content="Закрыть"
+                        Style="{StaticResource PrimaryRoundedButton}"
+                        Width="220" Height="56"
+                        HorizontalAlignment="Center"
+                        Margin="0,24,0,0"
+                        Click="BtnClose_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -161,8 +161,9 @@ namespace EAccess.Client
                 var exportFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "EAccessExports");
                 Directory.CreateDirectory(exportFolder);
 
-                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
-                var baseFileName = $"Report_{timestamp}";
+                var filterPart = SelectedReportMode switch { "По периоду аккредитации" => "Период", "По должностям" => "Должности", _ => "Все" };
+                var timestamp = DateTime.Now.ToString("ddMMyyyy_HHmmss", CultureInfo.InvariantCulture);
+                var baseFileName = $"Отчёт_СписокДопуска_{filterPart}_{timestamp}";
 
                 var csvPath = Path.Combine(exportFolder, baseFileName + ".csv");
                 var pdfPath = Path.Combine(exportFolder, baseFileName + ".pdf");
@@ -638,6 +639,12 @@ namespace EAccess.Client
             }
 
             return value;
+        }
+
+        private void BtnAnalytics_Click(object sender, RoutedEventArgs e)
+        {
+            var popup = new SecurityAnalyticsWindow(_allEntries) { Owner = this };
+            popup.ShowDialog();
         }
 
         private void OnPropertyChanged(string propertyName)

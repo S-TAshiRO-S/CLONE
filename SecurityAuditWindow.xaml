@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        Title="Контроль / Аудит"
+        Title="Аудит"
         Width="1244" Height="792"
         MinWidth="1244" MinHeight="792"
         MaxWidth="1244" MaxHeight="792"
@@ -179,7 +179,7 @@
                             Click="BtnAccessList_Click" Width="300" Height="64" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,25"/>
                     <Button x:Name="BtnReports" Content="Отчёты" Style="{StaticResource SidebarMenuButton}"
                             Click="BtnReports_Click" Width="300" Height="64" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,25"/>
-                    <Button x:Name="BtnControlAudit" Content="Контроль / Аудит" Style="{StaticResource SidebarMenuButton}"
+                    <Button x:Name="BtnControlAudit" Content="Аудит" Style="{StaticResource SidebarMenuButton}"
                             Click="BtnControlAudit_Click" Height="64" Width="300" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="30.5,10,0,0">
                         <Button x:Name="BtnExport" Width="160" Height="60" Style="{StaticResource PrimaryRoundedButton}" Click="BtnExport_Click"

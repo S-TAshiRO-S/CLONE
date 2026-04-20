@@ -102,9 +102,8 @@ namespace EAccess.Client
                 Directory.CreateDirectory(exportFolder);
 
                 var generatedAt = DateTime.Now;
-                var ts = generatedAt.ToString("ddMMyyyy_HHmmss");
-
-                var pdfPath = Path.Combine(exportFolder, $"Отчёт_АудитСметы_{kind}_{ts}.pdf");
+                var ts = DateTime.Now.ToString("ddMMyyyy_HHmmss");
+                var pdfPath = Path.Combine(exportFolder, $"Аудит_Организатор_{ts}.pdf");
 
                 ExportToPdf(pdfPath, toExport, generatedAt, kind);
 

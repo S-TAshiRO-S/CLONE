@@ -89,7 +89,7 @@
                             Click="BtnAccessList_Click" Width="300" Height="64" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,25"/>
                     <Button x:Name="BtnReports" Content="Отчёты" Style="{StaticResource SidebarMenuButton}"
                             Click="BtnReports_Click" Width="300" Height="64" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,25"/>
-                    <Button x:Name="BtnControlAudit" Content="Контроль / Аудит" Style="{StaticResource SidebarMenuButton}"
+                    <Button x:Name="BtnControlAudit" Content="Аудит" Style="{StaticResource SidebarMenuButton}"
                             Click="BtnControlAudit_Click" Height="64" Width="300" FontWeight="Bold" FontSize="28" Margin="30.5,0,0,0"/>
                 </StackPanel>
             </Grid>

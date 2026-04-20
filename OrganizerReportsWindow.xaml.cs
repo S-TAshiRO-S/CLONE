@@ -421,5 +421,11 @@ ORDER BY pi.PurchaseItemID DESC;";
             wnd.Show();
             Close();
         }
+
+        private void BtnAnalytics_Click(object sender, RoutedEventArgs e)
+        {
+            var popup = new OrganizerAnalyticsWindow(_allocated, _reserved, PurchaseEntries.ToList()) { Owner = this };
+            popup.ShowDialog();
+        }
     }
 }

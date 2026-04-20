@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="fonts\Ali-Bold.ttf" />
+    <None Remove="pictures\analytics.png" />
     <None Remove="pictures\export.png" />
     <None Remove="pictures\logo.png" />
     <None Remove="pictures\printer.png" />
@@ -21,6 +22,7 @@
 
   <ItemGroup>
     <Resource Include="fonts\Ali-Bold.ttf" />
+    <Resource Include="pictures\analytics.png" />
     <Resource Include="pictures\logo.png" />
     <Resource Include="pictures\printer.png" />
   </ItemGroup>

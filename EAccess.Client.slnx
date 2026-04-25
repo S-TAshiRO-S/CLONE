@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="../EAccess.Client.Tests/EAccess.Client.Tests.csproj" Id="47e268ce-870c-4b4f-8049-3f2ddbf3316b" />
   <Project Path="EAccess.Client.csproj" />
 </Solution>

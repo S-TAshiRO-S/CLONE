@@ -10,12 +10,14 @@
         Background="Transparent">
 
     <Grid Background="{StaticResource OverlayBrush}">
-        <Border Background="#2A2E3A" CornerRadius="24" Padding="36"
-                Width="960" MaxHeight="720"
+        <Border x:Name="AnalyticsCard"
+                Background="#2A2E3A" CornerRadius="24" Padding="36"
+                Width="960" MaxHeight="760"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 SnapsToDevicePixels="True">
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
@@ -27,9 +29,26 @@
                            FontSize="36" FontWeight="Bold"
                            Foreground="{StaticResource WhiteBrush}"
                            HorizontalAlignment="Center"
-                           Margin="0,0,0,24"/>
+                           Margin="0,0,0,16"/>
 
-                <Grid Grid.Row="1">
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <RadioButton x:Name="RbPie" Content="Круговая" IsChecked="True"
+                                 Checked="ChartType_Changed"
+                                 FontFamily="{StaticResource AppFont}" FontSize="18"
+                                 Foreground="{StaticResource WhiteBrush}"
+                                 Margin="0,0,28,0"/>
+                    <RadioButton x:Name="RbBar" Content="Столбчатая"
+                                 Checked="ChartType_Changed"
+                                 FontFamily="{StaticResource AppFont}" FontSize="18"
+                                 Foreground="{StaticResource WhiteBrush}"
+                                 Margin="0,0,28,0"/>
+                    <RadioButton x:Name="RbStrip" Content="Полосы"
+                                 Checked="ChartType_Changed"
+                                 FontFamily="{StaticResource AppFont}" FontSize="18"
+                                 Foreground="{StaticResource WhiteBrush}"/>
+                </StackPanel>
+
+                <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -62,13 +81,17 @@
                     </StackPanel>
                 </Grid>
 
-                <Button Grid.Row="2"
-                        Content="Закрыть"
-                        Style="{StaticResource PrimaryRoundedButton}"
-                        Width="220" Height="56"
-                        HorizontalAlignment="Center"
-                        Margin="0,24,0,0"
-                        Click="BtnClose_Click"/>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,0">
+                    <Button Content="Сохранить"
+                            Style="{StaticResource PrimaryRoundedButton}"
+                            Width="220" Height="56"
+                            Click="BtnSave_Click"
+                            Margin="0,0,16,0"/>
+                    <Button Content="Закрыть"
+                            Style="{StaticResource PrimaryRoundedButton}"
+                            Width="220" Height="56"
+                            Click="BtnClose_Click"/>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>
